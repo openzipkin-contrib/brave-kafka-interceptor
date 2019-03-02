@@ -1,5 +1,9 @@
 package no.sysco.middleware.kafka.interceptor.zipkin;
 
+/**
+ * Keys to be tagged on spans created by interceptors. See {@link TracingConsumerInterceptor} and
+ * {@link TracingProducerInterceptor}
+ */
 class KafkaInterceptorTagKey {
 
 	static final String KAFKA_TOPIC = "kafka.topic";

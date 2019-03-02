@@ -19,9 +19,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Consumer Interceptor that creates spans when records are received from Consumer API. It
- * creates a span per Record, and link it with an incoming context that could be stored in
- * Records header.
+ * Record spans when records are received from Consumer API.
+ *
+ * Creates a span per Record, and link it with an incoming context if stored in Records header.
  */
 public class TracingConsumerInterceptor<K, V> implements ConsumerInterceptor<K, V> {
 

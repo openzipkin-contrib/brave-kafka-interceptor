@@ -14,8 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Producer Interceptor to trace Records send to a Kafka Topic. It will extract context
- * from incoming Record, if exist injected in its header, and use it to link it to the
+ * Record traces when records are sent to a Kafka Topic.
+ *
+ * Extract context from incoming Record, if exist injected in its header, and use it to link it to the
  * Span created by the interceptor.
  */
 public class TracingProducerInterceptor<K, V> implements ProducerInterceptor<K, V> {

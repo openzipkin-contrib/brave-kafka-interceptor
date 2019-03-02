@@ -26,6 +26,9 @@ import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.
 import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.TRACE_ID_128BIT_ENABLED_CONFIG;
 import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.TRACE_ID_128BIT_ENABLED_DEFAULT;
 
+/**
+ * Initialization of Zipkin Tracing components.
+ */
 class TracingBuilder {
 
 	static final Logger LOGGER = LoggerFactory
