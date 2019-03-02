@@ -1,0 +1,69 @@
+---
+version: '3'
+services:
+  jdbc-source-connect:
+    image: confluentinc/cp-kafka-connect:5.0.0
+    ports:
+      - 8083:8083
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: kafka:9092
+      CONNECT_REST_ADVERTISED_HOST_NAME: localhost
+      CONNECT_REST_PORT: 8083
+      CONNECT_GROUP_ID: jdbc-source-connect
+      CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
+      CONNECT_CONFIG_STORAGE_TOPIC: jdbc-source-connect-configs
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_TOPIC: jdbc-source-connect-offsets
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_TOPIC: jdbc-source-connect-status
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
+      CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_PLUGIN_PATH: /usr/share/java,/etc/kafka-connect/jars
+      CONNECT_PRODUCER_ZIPKIN_SENDER_TYPE: "HTTP"
+      CONNECT_PRODUCER_ZIPKIN_HTTP_ENDPOINT: "http://zipkin:9411/api/v2/spans"
+      CONNECT_PRODUCER_INTERCEPTOR_CLASSES:
+        'no.sysco.middleware.kafka.interceptor.zipkin.TracingProducerInterceptor'
+      CONNECT_PRODUCER_ZIPKIN_LOCAL_SERVICE_NAME: "jdbc-source-connect"
+    volumes:
+      - ./target/kafka-interceptor-zipkin-0.3.3-SNAPSHOT.jar:/etc/kafka-connect/jars/kafka-interceptor-zipkin.jar
+
+  jdbc-sink-connect:
+    image: confluentinc/cp-kafka-connect:5.0.0
+    ports:
+      - 8084:8084
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: kafka:9092
+      CONNECT_REST_ADVERTISED_HOST_NAME: localhost
+      CONNECT_REST_PORT: 8084
+      CONNECT_GROUP_ID: jdbc-sink-connect
+      CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
+      CONNECT_CONFIG_STORAGE_TOPIC: jdbc-sink-connect-configs
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_TOPIC: jdbc-sink-connect-offsets
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_TOPIC: jdbc-sink-connect-status
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
+      CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_PLUGIN_PATH: /usr/share/java,/etc/kafka-connect/jars
+      CONNECT_CONSUMER_ZIPKIN_LOCAL_SERVICE_NAME: "jdbc-sink-connect"
+      CONNECT_CONSUMER_ZIPKIN_SENDER_TYPE: "HTTP"
+      CONNECT_CONSUMER_ZIPKIN_HTTP_ENDPOINT: "http://zipkin:9411/api/v2/spans"
+      CONNECT_CONSUMER_INTERCEPTOR_CLASSES:
+        'no.sysco.middleware.kafka.interceptor.zipkin.TracingConsumerInterceptor'
+    volumes:
+      - ./target/kafka-interceptor-zipkin-0.3.3-SNAPSHOT.jar:/etc/kafka-connect/jars/kafka-interceptor-zipkin.jar
+
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: example
+  adminer:
+    image: adminer
+    ports:
+    - 18080:8080
