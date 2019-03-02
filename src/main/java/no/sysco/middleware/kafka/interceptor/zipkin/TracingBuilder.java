@@ -48,7 +48,7 @@ public class TracingBuilder {
 		this.traceId128Bit = Boolean.valueOf(traceIdEnabledValue);
 	}
 
-	public Tracing build() {
+	Tracing build() {
 		Tracing.Builder builder = Tracing.newBuilder();
 		Sender sender = new SenderBuilder(configuration).build();
 		if (sender != null) {
@@ -70,14 +70,14 @@ public class TracingBuilder {
 
 		final TracingConfiguration configuration;
 
-		public SenderBuilder(TracingConfiguration configuration) {
+		SenderBuilder(TracingConfiguration configuration) {
 			String senderTypeValue = configuration.getStringOrDefault(SENDER_TYPE_CONFIG,
 					SENDER_TYPE_DEFAULT);
 			this.senderType = SenderType.valueOf(senderTypeValue);
 			this.configuration = configuration;
 		}
 
-		public Sender build() {
+		Sender build() {
 			Encoding encoding = new EncodingBuilder(configuration).build();
 			switch (senderType) {
 			case HTTP:
@@ -107,12 +107,12 @@ public class TracingBuilder {
 
 		final String endpoint;
 
-		public HttpSenderBuilder(TracingConfiguration configuration) {
+		HttpSenderBuilder(TracingConfiguration configuration) {
 			this.endpoint = configuration.getStringOrDefault(HTTP_ENDPOINT_CONFIG,
 					HTTP_ENDPOINT_DEFAULT);
 		}
 
-		public Sender build(Encoding encoding) {
+		Sender build(Encoding encoding) {
 			return OkHttpSender.newBuilder().endpoint(endpoint).encoding(encoding)
 					.build();
 		}
@@ -125,7 +125,7 @@ public class TracingBuilder {
 
 		final String bootstrapServers;
 
-		public KafkaSenderBuilder(TracingConfiguration configuration) {
+		KafkaSenderBuilder(TracingConfiguration configuration) {
 			this.bootstrapServers = configuration.getStringOrDefault(
 					KAFKA_BOOTSTRAP_SERVERS_CONFIG,
 					configuration.getStringOrDefault(
@@ -134,7 +134,7 @@ public class TracingBuilder {
 									CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG)));
 		}
 
-		public Sender build(Encoding encoding) {
+		Sender build(Encoding encoding) {
 			return KafkaSender.newBuilder().bootstrapServers(bootstrapServers)
 					.encoding(encoding).build();
 		}
@@ -149,13 +149,13 @@ public class TracingBuilder {
 
 		final Encoding encoding;
 
-		public EncodingBuilder(TracingConfiguration configuration) {
+		EncodingBuilder(TracingConfiguration configuration) {
 			String encodingValue = configuration.getStringOrDefault(ENCODING_CONFIG,
 					ENCODING_DEFAULT);
 			encoding = Encoding.valueOf(encodingValue);
 		}
 
-		public Encoding build() {
+		Encoding build() {
 			return encoding;
 		}
 
@@ -184,7 +184,7 @@ public class TracingBuilder {
 			this.rate = rate;
 		}
 
-		public Sampler build() {
+		Sampler build() {
 			return Sampler.create(rate);
 		}
 

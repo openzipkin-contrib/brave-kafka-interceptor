@@ -22,7 +22,7 @@ class TracingConfiguration {
 	String getStringList(String configKey) {
 		final String value;
 		final Object valueObject = configs.get(configKey);
-		if (valueObject != null) {
+		if (valueObject instanceof AbstractList) {
 			AbstractList valueList = (AbstractList) valueObject;
 			value = String.join(",", valueList);
 		}
