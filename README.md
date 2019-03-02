@@ -81,4 +81,4 @@ ksql http://localhost:8088
 
 5. Check traces:
 
-![](docs/trace.png)
+![](docs/traces.png)
