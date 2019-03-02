@@ -131,7 +131,6 @@ class TracingBuilder {
 
 	static class EncodingBuilder {
 
-
 		final Encoding encoding;
 
 		EncodingBuilder(TracingConfiguration configuration) {
@@ -147,7 +146,6 @@ class TracingBuilder {
 	}
 
 	static class SamplerBuilder {
-
 
 		static final Float SAMPLER_RATE_FALLBACK = 0.0F;
 

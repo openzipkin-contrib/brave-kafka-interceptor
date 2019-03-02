@@ -25,7 +25,8 @@ import org.slf4j.LoggerFactory;
  */
 public class TracingConsumerInterceptor<K, V> implements ConsumerInterceptor<K, V> {
 
-	static final Logger LOGGER = LoggerFactory.getLogger(TracingConsumerInterceptor.class);
+	static final Logger LOGGER = LoggerFactory
+			.getLogger(TracingConsumerInterceptor.class);
 
 	static final String SPAN_NAME = "on_consume";
 
@@ -109,10 +110,14 @@ public class TracingConsumerInterceptor<K, V> implements ConsumerInterceptor<K, 
 		tracing.close();
 	}
 
-	@Override public void configure(Map<String, ?> configs) {
+	@Override
+	public void configure(Map<String, ?> configs) {
 		configuration = new TracingConfiguration(configs);
 		tracing = new TracingBuilder(configuration).build();
-		extractor = tracing.propagation().extractor(KafkaInterceptorPropagation.HEADER_GETTER);
-		injector = tracing.propagation().injector(KafkaInterceptorPropagation.HEADER_SETTER);
+		extractor = tracing.propagation()
+				.extractor(KafkaInterceptorPropagation.HEADER_GETTER);
+		injector = tracing.propagation()
+				.injector(KafkaInterceptorPropagation.HEADER_SETTER);
 	}
+
 }

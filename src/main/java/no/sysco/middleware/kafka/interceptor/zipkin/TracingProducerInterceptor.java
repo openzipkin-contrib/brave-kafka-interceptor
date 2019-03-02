@@ -20,7 +20,8 @@ import org.slf4j.LoggerFactory;
  */
 public class TracingProducerInterceptor<K, V> implements ProducerInterceptor<K, V> {
 
-	static final Logger LOGGER = LoggerFactory.getLogger(TracingProducerInterceptor.class);
+	static final Logger LOGGER = LoggerFactory
+			.getLogger(TracingProducerInterceptor.class);
 
 	static final String SPAN_NAME = "on_send";
 
@@ -63,10 +64,14 @@ public class TracingProducerInterceptor<K, V> implements ProducerInterceptor<K, 
 		tracing.close();
 	}
 
-	@Override public void configure(Map<String, ?> configs) {
+	@Override
+	public void configure(Map<String, ?> configs) {
 		configuration = new TracingConfiguration(configs);
 		tracing = new TracingBuilder(configuration).build();
-		extractor = tracing.propagation().extractor(KafkaInterceptorPropagation.HEADER_GETTER);
-		injector = tracing.propagation().injector(KafkaInterceptorPropagation.HEADER_SETTER);
+		extractor = tracing.propagation()
+				.extractor(KafkaInterceptorPropagation.HEADER_GETTER);
+		injector = tracing.propagation()
+				.injector(KafkaInterceptorPropagation.HEADER_SETTER);
 	}
+
 }
