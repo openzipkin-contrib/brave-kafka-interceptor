@@ -1,0 +1,11 @@
+{
+  "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+  "tasks.max": "1",
+  "topics": "jdbc_source_table",
+  "connection.url": "jdbc:postgresql://postgres/postgres",
+  "connection.user": "postgres",
+  "connection.password": "example",
+  "auto.create": "true",
+  "table.prefix": "sink_",
+  "errors.log.enable": true
+}
