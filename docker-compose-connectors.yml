@@ -28,7 +28,7 @@ services:
         'no.sysco.middleware.kafka.interceptor.zipkin.TracingProducerInterceptor'
       CONNECT_PRODUCER_ZIPKIN_LOCAL_SERVICE_NAME: "jdbc-source-connect"
     volumes:
-      - ./target/kafka-interceptor-zipkin-0.3.3-SNAPSHOT.jar:/etc/kafka-connect/jars/kafka-interceptor-zipkin.jar
+      - ./target/kafka-interceptor-zipkin-0.4.0-SNAPSHOT.jar:/etc/kafka-connect/jars/kafka-interceptor-zipkin.jar
 
   jdbc-sink-connect:
     image: confluentinc/cp-kafka-connect:5.0.0
@@ -57,7 +57,7 @@ services:
       CONNECT_CONSUMER_INTERCEPTOR_CLASSES:
         'no.sysco.middleware.kafka.interceptor.zipkin.TracingConsumerInterceptor'
     volumes:
-      - ./target/kafka-interceptor-zipkin-0.3.3-SNAPSHOT.jar:/etc/kafka-connect/jars/kafka-interceptor-zipkin.jar
+      - ./target/kafka-interceptor-zipkin-0.4.0-SNAPSHOT.jar:/etc/kafka-connect/jars/kafka-interceptor-zipkin.jar
 
   postgres:
     image: postgres

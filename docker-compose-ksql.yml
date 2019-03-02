@@ -15,7 +15,6 @@ services:
       KSQL_KSQL_SERVICE_ID: ksql
       KSQL_CONSUMER_ZIPKIN_SENDER_TYPE: "KAFKA"
       KSQL_CONSUMER_ZIPKIN_LOCAL_SERVICE_NAME: "ksql"
-      KSQL_PRODUCER_INTERCEPTOR_CLASSES: "no.sysco.middleware.kafka.interceptor.zipkin.TracingProducerInterceptor"
       KSQL_CONSUMER_INTERCEPTOR_CLASSES: "no.sysco.middleware.kafka.interceptor.zipkin.TracingConsumerInterceptor"
     volumes:
-      - ./target/kafka-interceptor-zipkin-0.3.3-SNAPSHOT.jar:/usr/share/java/ksql-server/kafka-interceptor-zipkin.jar
+      - ./target/kafka-interceptor-zipkin-0.4.0-SNAPSHOT.jar:/usr/share/java/ksql-server/kafka-interceptor-zipkin.jar

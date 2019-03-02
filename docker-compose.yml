@@ -28,7 +28,7 @@ services:
     image: openzipkin/zipkin:2.12
     environment:
       STORAGE_TYPE: mem
-      KAFKA_BOOTSTRAP_SERVERS: broker:9092
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       # Uncomment to enable debug logging
       JAVA_OPTS: "-Dlogging.level.zipkin=DEBUG -Dlogging.level.zipkin2=DEBUG"
     ports:

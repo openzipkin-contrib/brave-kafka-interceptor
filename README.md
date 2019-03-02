@@ -1,11 +1,12 @@
 # Kafka Interceptor: Zipkin
 
-Instrumentation to create traces from Kafka Clients (e.g. Consumer, Producer)
-using Interceptors (see [here](https://kafka.apache.org/0100/javadoc/org/apache/kafka/clients/producer/ProducerInterceptor.html)
-and [here](https://kafka.apache.org/0100/javadoc/org/apache/kafka/clients/consumer/ConsumerInterceptor.html)).
+Kafka [Consumer](https://kafka.apache.org/0100/javadoc/org/apache/kafka/clients/consumer/ConsumerInterceptor.html)
+and 
+[Producer](https://kafka.apache.org/0100/javadoc/org/apache/kafka/clients/producer/ProducerInterceptor.html) 
+Interceptor to record tracing data.
 
-This interceptors could be added to Kafka Connectors via configuration, and to other off-the-shelf components like 
-Kafka REST Proxy, KSQL and so on.
+This interceptors could be added to Kafka Connectors via configuration and to other off-the-shelf 
+components like Kafka REST Proxy, KSQL and so on.
 
 ## Installation
 
@@ -34,26 +35,50 @@ the `on_consume` method provided by the API, not how long it took to commit, or 
 
 ### Configuration
 
-By default, Interceptors will use Kafka Cluster as transport for Zipkin spans, and will pick `client.id` as service name.
-
-If you want to override these values, use this properties in your configuration:
-
 | Key                           | Value                                                                                 |
 |-------------------------------|---------------------------------------------------------------------------------------|
-| `zipkin.api.url`              | URL where Zipkin API is deployed. If not present, `zipkin.bootstrap.servers` is used. |
-| `zipkin.bootstrap.servers`    | Bootstrap Servers list to send Spans. if not present, `bootstrap.servers` (Kafka Client property) is used. |
-| `zipkin.local.service_name`   | Application Service name used to tag span. If not present, and producer, `client.id` will be used. If not present and consumer, `group.id` is used. |
-| `zipkin.remote.service_name`  | Remote Service to assign to Kafka. If not present, `"kafka"` is used.                 |
+| `zipkin.sender.type`          | Sender type: `NONE`(default), `KAFKA`, `HTTP` |
+| `zipkin.encoding` | Zipkin encoding: `JSON`(default), `PROTO3`. |
+| `zipkin.http.endpoint`        | Zipkin HTTP Endpoint sender. |
+| `zipkin.kafka.bootstrap.servers`    | Bootstrap Servers list to send Spans. if not present, `bootstrap.servers` (Kafka Client property) is used. |
+| `zipkin.local.service.name`   | Application Service name used to tag span. Default: kafka-client. |
+| `zipkin.trace.id.128bit.enabled` | Trace ID 128 bit enabled, default: `true` |
 | `zipkin.sampler.rate`         | Rate to sample spans. Default: `1.0`                                                  |
 
 ### How to test it
 
-Start Docker Compose [docker-compose.yml](blob/master/docker-compose.yml)
+Start Docker Compose [docker-compose.yml](docker-compose.yml)
 
-```
+```bash
 docker-compose up -d
 ```
 
-In `src/test/io/github/jeqo/brave/kafka/interceptors/examples`, a Producer and Consumer is placed to test interceptors.
+And to test how it works with Kafka Connectors and KSQL, other composes can be started:
+
+```bash
+docker-compose -f docker-compose.yml -f docker-compose-ksql.yml -f docker-compose-connectors.yml up -d
+```
+
+Steps to test:
+
+1. Create a Table "source_table" in the Postgres Database in http://localhost:18080
+
+2. Once database is created deploy source and sink connectors using Makefile: 
+
+```bash
+make source-connector
+make sink-connector
+```
+
+3. Insert values to the table and check the traces.
+
+4. Create a Stream in KSQL:
+
+```bash
+ksql http://localhost:8088
+ CREATE STREAM source_stream (id BIGINT, name VARCHAR) WITH (KAFKA_TOPIC='jdbc_source_table', VALUE_FORMAT='JSON');
+```
+
+5. Check traces:
 
 ![](docs/trace.png)
