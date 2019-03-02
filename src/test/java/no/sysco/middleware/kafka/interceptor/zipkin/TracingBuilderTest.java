@@ -11,6 +11,12 @@ import zipkin2.reporter.Sender;
 import zipkin2.reporter.kafka11.KafkaSender;
 import zipkin2.reporter.okhttp3.OkHttpSender;
 
+import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.ENCODING_CONFIG;
+import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.ENCODING_DEFAULT;
+import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.KAFKA_BOOTSTRAP_SERVERS_CONFIG;
+import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.SAMPLER_RATE_CONFIG;
+import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.SAMPLER_RATE_DEFAULT;
+import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.SENDER_TYPE_CONFIG;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -26,8 +32,7 @@ public class TracingBuilderTest {
 		// When
 		Encoding encoding = new TracingBuilder.EncodingBuilder(config).build();
 		// Then
-		Encoding defaultEncoding = Encoding
-				.valueOf(TracingBuilder.EncodingBuilder.ENCODING_DEFAULT);
+		Encoding defaultEncoding = Encoding.valueOf(ENCODING_DEFAULT);
 		assertEquals(defaultEncoding, encoding);
 	}
 
@@ -35,7 +40,7 @@ public class TracingBuilderTest {
 	public void shouldBuildEncoding() {
 		// Given
 		Map<String, String> map = new HashMap<>();
-		map.put(TracingBuilder.EncodingBuilder.ENCODING_CONFIG, Encoding.PROTO3.name());
+		map.put(ENCODING_CONFIG, Encoding.PROTO3.name());
 		TracingConfiguration config = new TracingConfiguration(map);
 		// When
 		Encoding encoding = new TracingBuilder.EncodingBuilder(config).build();
@@ -52,7 +57,7 @@ public class TracingBuilderTest {
 		Sampler sampler = new TracingBuilder.SamplerBuilder(config).build();
 		// Then
 		float defaultSampler = Float
-				.parseFloat(TracingBuilder.SamplerBuilder.SAMPLER_RATE_DEFAULT);
+				.parseFloat(SAMPLER_RATE_DEFAULT);
 		assertEquals(Sampler.create(defaultSampler), sampler);
 	}
 
@@ -60,7 +65,7 @@ public class TracingBuilderTest {
 	public void shouldBuildSampler() {
 		// Given
 		Map<String, String> map = new HashMap<>();
-		map.put(TracingBuilder.SamplerBuilder.SAMPLER_RATE_CONFIG, "0.5");
+		map.put(SAMPLER_RATE_CONFIG, "0.5");
 		TracingConfiguration config = new TracingConfiguration(map);
 		// When
 		Sampler sampler = new TracingBuilder.SamplerBuilder(config).build();
@@ -72,7 +77,7 @@ public class TracingBuilderTest {
 	public void shouldBuildSamplerWithFallback() {
 		// Given
 		Map<String, String> map = new HashMap<>();
-		map.put(TracingBuilder.SamplerBuilder.SAMPLER_RATE_CONFIG, "1.5");
+		map.put(SAMPLER_RATE_CONFIG, "1.5");
 		TracingConfiguration config = new TracingConfiguration(map);
 		// When
 		Sampler sampler = new TracingBuilder.SamplerBuilder(config).build();
@@ -95,7 +100,7 @@ public class TracingBuilderTest {
 	public void shouldBuildNoneSender() {
 		// Given
 		Map<String, String> map = new HashMap<>();
-		map.put(TracingBuilder.SenderBuilder.SENDER_TYPE_CONFIG,
+		map.put(SENDER_TYPE_CONFIG,
 				TracingBuilder.SenderBuilder.SenderType.NONE.name());
 		TracingConfiguration config = new TracingConfiguration(map);
 		// When
@@ -108,7 +113,7 @@ public class TracingBuilderTest {
 	public void shouldBuildHttpSender() {
 		// Given
 		Map<String, String> map = new HashMap<>();
-		map.put(TracingBuilder.SenderBuilder.SENDER_TYPE_CONFIG,
+		map.put(SENDER_TYPE_CONFIG,
 				TracingBuilder.SenderBuilder.SenderType.HTTP.name());
 		TracingConfiguration config = new TracingConfiguration(map);
 		// When
@@ -121,9 +126,9 @@ public class TracingBuilderTest {
 	public void shouldBuildKafkaSenderWithConfig() {
 		// Given
 		Map<String, String> map = new HashMap<>();
-		map.put(TracingBuilder.SenderBuilder.SENDER_TYPE_CONFIG,
+		map.put(SENDER_TYPE_CONFIG,
 				TracingBuilder.SenderBuilder.SenderType.KAFKA.name());
-		map.put(TracingBuilder.KafkaSenderBuilder.KAFKA_BOOTSTRAP_SERVERS_CONFIG,
+		map.put(KAFKA_BOOTSTRAP_SERVERS_CONFIG,
 				"localhost:9092");
 		TracingConfiguration config = new TracingConfiguration(map);
 		// When
@@ -136,7 +141,7 @@ public class TracingBuilderTest {
 	public void shouldBuildKafkaSenderWithDefault() {
 		// Given
 		Map<String, String> map = new HashMap<>();
-		map.put(TracingBuilder.SenderBuilder.SENDER_TYPE_CONFIG,
+		map.put(SENDER_TYPE_CONFIG,
 				TracingBuilder.SenderBuilder.SenderType.KAFKA.name());
 		map.put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
 		TracingConfiguration config = new TracingConfiguration(map);
@@ -150,7 +155,7 @@ public class TracingBuilderTest {
 	public void shouldBuildKafkaSenderWithList() {
 		// Given
 		Map<String, Object> map = new HashMap<>();
-		map.put(TracingBuilder.SenderBuilder.SENDER_TYPE_CONFIG,
+		map.put(SENDER_TYPE_CONFIG,
 				TracingBuilder.SenderBuilder.SenderType.KAFKA.name());
 		map.put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG,
 				Arrays.asList("localhost:9092", "localhost:9094"));
