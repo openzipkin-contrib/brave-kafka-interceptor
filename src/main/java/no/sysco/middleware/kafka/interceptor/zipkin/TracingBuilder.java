@@ -12,37 +12,35 @@ import zipkin2.reporter.Sender;
 import zipkin2.reporter.kafka11.KafkaSender;
 import zipkin2.reporter.okhttp3.OkHttpSender;
 
-public class TracingBuilder {
+import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.ENCODING_CONFIG;
+import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.ENCODING_DEFAULT;
+import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.HTTP_ENDPOINT_CONFIG;
+import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.HTTP_ENDPOINT_DEFAULT;
+import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.KAFKA_BOOTSTRAP_SERVERS_CONFIG;
+import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.LOCAL_SERVICE_NAME_CONFIG;
+import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.LOCAL_SERVICE_NAME_DEFAULT;
+import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.SAMPLER_RATE_CONFIG;
+import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.SAMPLER_RATE_DEFAULT;
+import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.SENDER_TYPE_CONFIG;
+import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.SENDER_TYPE_DEFAULT;
+import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.TRACE_ID_128BIT_ENABLED_CONFIG;
+import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.TRACE_ID_128BIT_ENABLED_DEFAULT;
 
-	public static final String LOCAL_SERVICE_NAME_CONFIG = "zipkin.local.service.name";
-
-	public static final String LOCAL_SERVICE_NAME_DEFAULT = "kafka-client";
-
-	public static final String REMOTE_SERVICE_NAME_CONFIG = "zipkin.remote.service.name";
-
-	public static final String REMOTE_SERVICE_NAME_DEFAULT = "kafka";
-
-	public static final String TRACE_ID_128BIT_ENABLED_CONFIG = "zipkin.trace.id.128bit.enabled";
-
-	public static final String TRACE_ID_128BIT_ENABLED_DEFAULT = "true";
+class TracingBuilder {
 
 	static final Logger LOGGER = LoggerFactory
 			.getLogger(no.sysco.middleware.kafka.interceptor.zipkin.TracingBuilder.class);
 
 	final String localServiceName;
 
-	final String remoteServiceName;
-
 	final boolean traceId128Bit;
 
 	final TracingConfiguration configuration;
 
-	public TracingBuilder(TracingConfiguration configuration) {
+	TracingBuilder(TracingConfiguration configuration) {
 		this.configuration = configuration;
 		this.localServiceName = configuration.getStringOrDefault(
 				LOCAL_SERVICE_NAME_CONFIG, LOCAL_SERVICE_NAME_DEFAULT);
-		this.remoteServiceName = configuration.getStringOrDefault(
-				REMOTE_SERVICE_NAME_CONFIG, REMOTE_SERVICE_NAME_DEFAULT);
 		String traceIdEnabledValue = configuration.getStringOrDefault(
 				TRACE_ID_128BIT_ENABLED_CONFIG, TRACE_ID_128BIT_ENABLED_DEFAULT);
 		this.traceId128Bit = Boolean.valueOf(traceIdEnabledValue);
@@ -60,11 +58,7 @@ public class TracingBuilder {
 				.traceId128Bit(traceId128Bit).build();
 	}
 
-	public static class SenderBuilder {
-
-		public static final String SENDER_TYPE_CONFIG = "zipkin.sender.type";
-
-		public static final String SENDER_TYPE_DEFAULT = SenderType.NONE.name();
+	static class SenderBuilder {
 
 		final SenderType senderType;
 
@@ -99,11 +93,7 @@ public class TracingBuilder {
 
 	}
 
-	public static class HttpSenderBuilder {
-
-		public static final String HTTP_ENDPOINT_CONFIG = "zipkin.http.endpoint";
-
-		public static final String HTTP_ENDPOINT_DEFAULT = "http://localhost:9411/api/v2/spans";
+	static class HttpSenderBuilder {
 
 		final String endpoint;
 
@@ -120,8 +110,6 @@ public class TracingBuilder {
 	}
 
 	public static class KafkaSenderBuilder {
-
-		public static final String KAFKA_BOOTSTRAP_SERVERS_CONFIG = "zipkin.kafka.bootstrap.servers";
 
 		final String bootstrapServers;
 
@@ -141,11 +129,8 @@ public class TracingBuilder {
 
 	}
 
-	public static class EncodingBuilder {
+	static class EncodingBuilder {
 
-		public static final String ENCODING_CONFIG = "zipkin.encoding";
-
-		public static final String ENCODING_DEFAULT = "JSON";
 
 		final Encoding encoding;
 
@@ -161,13 +146,10 @@ public class TracingBuilder {
 
 	}
 
-	public static class SamplerBuilder {
+	static class SamplerBuilder {
 
-		public static final String SAMPLER_RATE_CONFIG = "zipkin.sampler.rate";
 
-		public static final String SAMPLER_RATE_DEFAULT = "1.0F";
-
-		public static final Float SAMPLER_RATE_FALLBACK = 0.0F;
+		static final Float SAMPLER_RATE_FALLBACK = 0.0F;
 
 		final Float rate;
 

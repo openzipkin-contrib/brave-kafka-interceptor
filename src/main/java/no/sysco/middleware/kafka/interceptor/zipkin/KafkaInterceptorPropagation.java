@@ -12,7 +12,7 @@ import java.nio.charset.Charset;
  */
 final class KafkaInterceptorPropagation {
 
-	private static final Charset UTF_8 = Charset.forName("UTF-8");
+	static final Charset UTF_8 = Charset.forName("UTF-8");
 
 	static final Setter<Headers, String> HEADER_SETTER = (carrier, key, value) -> {
 		carrier.remove(key);
