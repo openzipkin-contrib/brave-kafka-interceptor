@@ -1,18 +1,24 @@
+MAVEN := ./mvnw
+
 .PHONY: all
 all: build
 
 .PHONY: format
 format:
-	./mvnw spring-javaformat:apply
+	${MAVEN} spring-javaformat:apply
+
+.PHONY: license
+license:
+	${MAVEN} com.mycila:license-maven-plugin:format
 
 .PHONY: build
-build: format
-	./mvnw clean package
+build: format license
+	${MAVEN} clean package
 
 .PHONY: release
 release:
-	./mvnw release:prepare
-	./mvnw release:perform
+	${MAVEN} release:prepare
+	${MAVEN} release:perform
 
 .PHONY: dc-up
 docker:
