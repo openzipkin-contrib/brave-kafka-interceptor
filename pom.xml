@@ -9,6 +9,25 @@
 
     <name>Kafka Interceptor: Zipkin</name>
     <description>Kafka Interceptors to trace send and poll operations with Zipkin instrumentation.</description>
+    <url>https://github.com/sysco-middleware/kafka-interceptor-zipkin</url>
+
+    <developers>
+        <developer>
+            <id>sysco-middleware</id>
+            <name>Sysco Middleware developers</name>
+            <organization>Sysco AS</organization>
+            <url>http://github.com/sysco-middleware</url>
+            <organizationUrl>http://sysco.no</organizationUrl>
+        </developer>
+    </developers>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
