@@ -98,6 +98,7 @@ public class TracingConsumerInterceptor<K, V> implements ConsumerInterceptor<K, 
 					Span span = tracing.tracer().nextSpan(extracted);
 					if (!span.isNoop()) {
 						span.name(SPAN_NAME).kind(Span.Kind.CONSUMER)
+								.remoteServiceName(remoteServiceName)
 								.tag(KafkaInterceptorTagKey.KAFKA_TOPIC, topic)
 								.tag(KafkaInterceptorTagKey.KAFKA_GROUP_ID,
 										configuration.getString(
