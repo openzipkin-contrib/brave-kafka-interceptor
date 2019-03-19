@@ -1,5 +1,7 @@
 # Kafka Interceptor: Zipkin
 
+[![Build Status](https://www.travis-ci.org/sysco-middleware/kafka-interceptor-zipkin.svg?branch=master)](https://www.travis-ci.org/sysco-middleware/kafka-interceptor-zipkin)
+
 Kafka [Consumer](https://kafka.apache.org/0100/javadoc/org/apache/kafka/clients/consumer/ConsumerInterceptor.html)
 and 
 [Producer](https://kafka.apache.org/0100/javadoc/org/apache/kafka/clients/producer/ProducerInterceptor.html) 
