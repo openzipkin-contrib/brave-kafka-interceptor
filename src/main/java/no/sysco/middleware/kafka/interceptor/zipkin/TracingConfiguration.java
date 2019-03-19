@@ -40,6 +40,10 @@ public class TracingConfiguration {
 
 	public static final String LOCAL_SERVICE_NAME_DEFAULT = "kafka-client";
 
+	public static final String REMOTE_SERVICE_NAME_CONFIG = "zipkin.remote.service.name";
+
+	public static final String REMOTE_SERVICE_NAME_DEFAULT = "kafka";
+
 	public static final String TRACE_ID_128BIT_ENABLED_CONFIG = "zipkin.trace.id.128bit.enabled";
 
 	public static final String TRACE_ID_128BIT_ENABLED_DEFAULT = "true";

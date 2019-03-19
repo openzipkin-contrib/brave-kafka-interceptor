@@ -32,6 +32,8 @@ import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.
 import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.KAFKA_BOOTSTRAP_SERVERS_CONFIG;
 import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.LOCAL_SERVICE_NAME_CONFIG;
 import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.LOCAL_SERVICE_NAME_DEFAULT;
+import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.REMOTE_SERVICE_NAME_CONFIG;
+import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.REMOTE_SERVICE_NAME_DEFAULT;
 import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.SAMPLER_RATE_CONFIG;
 import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.SAMPLER_RATE_DEFAULT;
 import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.SENDER_TYPE_CONFIG;

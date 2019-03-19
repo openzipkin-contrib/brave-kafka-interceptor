@@ -26,6 +26,9 @@ import org.apache.kafka.common.header.Headers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.REMOTE_SERVICE_NAME_CONFIG;
+import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.REMOTE_SERVICE_NAME_DEFAULT;
+
 /**
  * Record traces when records are sent to a Kafka Topic.
  *
@@ -42,6 +45,8 @@ public class TracingProducerInterceptor<K, V> implements ProducerInterceptor<K, 
 	TracingConfiguration configuration;
 
 	Tracing tracing;
+
+	String remoteServiceName;
 
 	TraceContext.Injector<Headers> injector;
 
@@ -61,7 +66,8 @@ public class TracingProducerInterceptor<K, V> implements ProducerInterceptor<K, 
 			span.tag(KafkaInterceptorTagKey.KAFKA_TOPIC, record.topic())
 					.tag(KafkaInterceptorTagKey.KAFKA_CLIENT_ID,
 							configuration.getString(ProducerConfig.CLIENT_ID_CONFIG))
-					.name(SPAN_NAME).kind(Span.Kind.PRODUCER).start();
+					.name(SPAN_NAME).kind(Span.Kind.PRODUCER)
+					.remoteServiceName(remoteServiceName).start();
 		}
 		span.finish();
 		LOGGER.debug("Producer Record intercepted: {}", span.context());
@@ -81,6 +87,8 @@ public class TracingProducerInterceptor<K, V> implements ProducerInterceptor<K, 
 	@Override
 	public void configure(Map<String, ?> configs) {
 		configuration = new TracingConfiguration(configs);
+		remoteServiceName = configuration.getStringOrDefault(REMOTE_SERVICE_NAME_CONFIG,
+				REMOTE_SERVICE_NAME_DEFAULT);
 		tracing = new TracingBuilder(configuration).build();
 		extractor = tracing.propagation()
 				.extractor(KafkaInterceptorPropagation.HEADER_GETTER);

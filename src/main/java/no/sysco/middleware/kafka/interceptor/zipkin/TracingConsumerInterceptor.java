@@ -31,6 +31,9 @@ import org.apache.kafka.common.header.Headers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.REMOTE_SERVICE_NAME_CONFIG;
+import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.REMOTE_SERVICE_NAME_DEFAULT;
+
 /**
  * Record spans when records are received from Consumer API.
  *
@@ -47,6 +50,8 @@ public class TracingConsumerInterceptor<K, V> implements ConsumerInterceptor<K, 
 	TracingConfiguration configuration;
 
 	Tracing tracing;
+
+	String remoteServiceName;
 
 	TraceContext.Injector<Headers> injector;
 
@@ -74,6 +79,7 @@ public class TracingConsumerInterceptor<K, V> implements ConsumerInterceptor<K, 
 								consumerSpanForTopic = tracing.tracer()
 										.nextSpan(extracted).name("poll")
 										.kind(Span.Kind.CONSUMER)
+										.remoteServiceName(remoteServiceName)
 										.tag(KafkaInterceptorTagKey.KAFKA_TOPIC, topic)
 										.tag(KafkaInterceptorTagKey.KAFKA_GROUP_ID,
 												configuration.getString(
@@ -127,6 +133,8 @@ public class TracingConsumerInterceptor<K, V> implements ConsumerInterceptor<K, 
 	@Override
 	public void configure(Map<String, ?> configs) {
 		configuration = new TracingConfiguration(configs);
+		remoteServiceName = configuration.getStringOrDefault(REMOTE_SERVICE_NAME_CONFIG,
+				REMOTE_SERVICE_NAME_DEFAULT);
 		tracing = new TracingBuilder(configuration).build();
 		extractor = tracing.propagation()
 				.extractor(KafkaInterceptorPropagation.HEADER_GETTER);
