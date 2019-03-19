@@ -19,7 +19,7 @@
 
     <groupId>no.sysco.middleware.kafka</groupId>
     <artifactId>kafka-interceptor-zipkin</artifactId>
-    <version>0.4.2</version>
+    <version>0.4.3-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Kafka Interceptor: Zipkin</name>
@@ -296,7 +296,7 @@
         <developerConnection>scm:git:ssh://git@github.com/sysco-middleware/kafka-interceptor-zipkin.git
         </developerConnection>
         <url>http://github.com/sysco-middleware/kafka-interceptor-zipkin/tree/master</url>
-        <tag>0.4.2</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <issueManagement>
