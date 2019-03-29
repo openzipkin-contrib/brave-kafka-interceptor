@@ -18,6 +18,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import zipkin2.Span;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 public class TracingProducerInterceptorTest extends BaseTracingTest {
@@ -44,6 +45,25 @@ public class TracingProducerInterceptorTest extends BaseTracingTest {
 		// Then
 		final Span span = spans.getLast();
 		assertNotNull(span);
+	}
+
+	@Test
+	public void shouldCreateChildSpanIfContextAvailable() {
+		// Given
+		final TracingProducerInterceptor<String, String> interceptor =
+				new TracingProducerInterceptor<>();
+		interceptor.configure(map);
+		interceptor.tracing = tracing;
+		brave.Span span = tracing.tracer().newTrace();
+		tracing.propagation()
+				.injector(KafkaInterceptorPropagation.HEADER_SETTER)
+				.inject(span.context(), record.headers());
+		// When
+		interceptor.onSend(record);
+		// Then
+		final Span child = spans.getLast();
+		assertNotNull(child);
+		assertEquals(span.context().spanIdString(), child.parentId());
 	}
 
 }
