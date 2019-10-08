@@ -49,8 +49,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <kafka.version>2.1.1</kafka.version>
-        <brave.version>5.6.0</brave.version>
+        <kafka.version>2.3.0</kafka.version>
+        <brave.version>5.8.0</brave.version>
         <junit.version>4.12</junit.version>
     </properties>
 
@@ -58,7 +58,7 @@
         <dependencies>
             <dependency>
                 <groupId>io.zipkin.brave</groupId>
-                <artifactId>brave-bom</artifactId>
+                <artifactId>brave</artifactId>
                 <version>${brave.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
@@ -71,15 +71,18 @@
         <dependency>
             <groupId>io.zipkin.brave</groupId>
             <artifactId>brave-instrumentation-kafka-clients</artifactId>
+            <version>5.8.0</version>
         </dependency>
         <!-- Zipkin sender supported -->
         <dependency>
             <groupId>io.zipkin.reporter2</groupId>
             <artifactId>zipkin-sender-okhttp3</artifactId>
+            <version>2.10.3</version>
         </dependency>
         <dependency>
             <groupId>io.zipkin.reporter2</groupId>
-            <artifactId>zipkin-sender-kafka11</artifactId>
+            <artifactId>zipkin-sender-kafka</artifactId>
+            <version>2.10.3</version>
         </dependency>
 
         <!-- Kafka Clients dependency that will be provided by application -->

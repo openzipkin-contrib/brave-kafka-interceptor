@@ -21,7 +21,7 @@ import org.apache.kafka.clients.CommonClientConfigs;
 import org.junit.Test;
 import zipkin2.codec.Encoding;
 import zipkin2.reporter.Sender;
-import zipkin2.reporter.kafka11.KafkaSender;
+import zipkin2.reporter.kafka.KafkaSender;
 import zipkin2.reporter.okhttp3.OkHttpSender;
 
 import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.ENCODING_CONFIG;

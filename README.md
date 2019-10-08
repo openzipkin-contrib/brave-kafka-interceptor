@@ -62,10 +62,11 @@ docker-compose -f docker-compose.yml -f docker-compose-ksql.yml -f docker-compos
 ```
 
 Steps to test:
+1. Navigate to http://localhost:18080 and login using __postgres__ as server, __postgres__ as username and __example__ as password
 
-1. Create a Table "source_table" in the Postgres Database in http://localhost:18080
+2. Create a table "source_table" with an auto-increment __id__ and __name__ field
 
-2. Once database is created deploy source and sink connectors using Makefile: 
+3. Once table is created deploy source and sink connectors using Makefile: 
 
 ```bash
 make source-connector
