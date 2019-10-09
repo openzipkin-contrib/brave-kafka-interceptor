@@ -23,45 +23,47 @@ import static org.junit.Assert.assertNotNull;
 
 public class TracingProducerInterceptorTest extends BaseTracingTest {
 
-	private final ProducerRecord<String, String> record = new ProducerRecord<>("topic",
-			"value");
+  private final ProducerRecord<String, String> record = new ProducerRecord<>("topic",
+    "value");
 
-	@Test
-	public void shouldNotTouchRecords() {
-		final TracingProducerInterceptor<String, String> interceptor = new TracingProducerInterceptor<>();
-		interceptor.configure(map);
-		final ProducerRecord<String, String> tracedRecord = interceptor.onSend(record);
-		Assert.assertEquals(record, tracedRecord);
-	}
+  @Test
+  public void shouldNotTouchRecords() {
+    final TracingProducerInterceptor<String, String> interceptor =
+      new TracingProducerInterceptor<>();
+    interceptor.configure(map);
+    final ProducerRecord<String, String> tracedRecord = interceptor.onSend(record);
+    Assert.assertEquals(record, tracedRecord);
+  }
 
-	@Test
-	public void shouldCreateSpanOnSend() {
-		// Given
-		final TracingProducerInterceptor<String, String> interceptor = new TracingProducerInterceptor<>();
-		interceptor.configure(map);
-		interceptor.tracing = tracing;
-		// When
-		interceptor.onSend(record);
-		// Then
-		final Span span = spans.getLast();
-		assertNotNull(span);
-	}
+  @Test
+  public void shouldCreateSpanOnSend() {
+    // Given
+    final TracingProducerInterceptor<String, String> interceptor =
+      new TracingProducerInterceptor<>();
+    interceptor.configure(map);
+    interceptor.tracing = tracing;
+    // When
+    interceptor.onSend(record);
+    // Then
+    final Span span = spans.getLast();
+    assertNotNull(span);
+  }
 
-	@Test
-	public void shouldCreateChildSpanIfContextAvailable() {
-		// Given
-		final TracingProducerInterceptor<String, String> interceptor = new TracingProducerInterceptor<>();
-		interceptor.configure(map);
-		interceptor.tracing = tracing;
-		brave.Span span = tracing.tracer().newTrace();
-		tracing.propagation().injector(KafkaInterceptorPropagation.HEADER_SETTER)
-				.inject(span.context(), record.headers());
-		// When
-		interceptor.onSend(record);
-		// Then
-		final Span child = spans.getLast();
-		assertNotNull(child);
-		assertEquals(span.context().spanIdString(), child.parentId());
-	}
-
+  @Test
+  public void shouldCreateChildSpanIfContextAvailable() {
+    // Given
+    final TracingProducerInterceptor<String, String> interceptor =
+      new TracingProducerInterceptor<>();
+    interceptor.configure(map);
+    interceptor.tracing = tracing;
+    brave.Span span = tracing.tracer().newTrace();
+    tracing.propagation().injector(KafkaInterceptorPropagation.HEADER_SETTER)
+      .inject(span.context(), record.headers());
+    // When
+    interceptor.onSend(record);
+    // Then
+    final Span child = spans.getLast();
+    assertNotNull(child);
+    assertEquals(span.context().spanIdString(), child.parentId());
+  }
 }
