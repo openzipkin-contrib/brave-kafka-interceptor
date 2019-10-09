@@ -27,8 +27,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.header.Headers;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static brave.kafka.interceptor.TracingConfiguration.REMOTE_SERVICE_NAME_CONFIG;
 import static brave.kafka.interceptor.TracingConfiguration.REMOTE_SERVICE_NAME_DEFAULT;
@@ -39,9 +37,7 @@ import static brave.kafka.interceptor.TracingConfiguration.REMOTE_SERVICE_NAME_D
  * Creates a span per Record, and link it with an incoming context if stored in Records header.
  */
 public class TracingConsumerInterceptor<K, V> implements ConsumerInterceptor<K, V> {
-
-  static final Logger LOGGER = LoggerFactory.getLogger(TracingConsumerInterceptor.class);
-  static final String SPAN_NAME = "on_consume";
+  static final String SPAN_NAME = "poll";
 
   TracingConfiguration configuration;
   Tracing tracing;
@@ -56,9 +52,7 @@ public class TracingConsumerInterceptor<K, V> implements ConsumerInterceptor<K, 
       String topic = partition.topic();
       List<ConsumerRecord<K, V>> recordsInPartition = records.records(partition);
       for (ConsumerRecord<K, V> record : recordsInPartition) {
-        TraceContextOrSamplingFlags extracted = extractor
-          .extract(record.headers());
-
+        TraceContextOrSamplingFlags extracted = extractor.extract(record.headers());
         // If we extracted neither a trace context, nor request-scoped data
         // (extra),
         // make or reuse a span for this topic
@@ -67,16 +61,15 @@ public class TracingConsumerInterceptor<K, V> implements ConsumerInterceptor<K, 
           if (consumerSpanForTopic == null) {
             consumerSpansForTopic.put(topic,
               consumerSpanForTopic = tracing.tracer()
-                .nextSpan(extracted).name("poll")
+                .nextSpan(extracted)
+                .name(SPAN_NAME)
                 .kind(Span.Kind.CONSUMER)
                 .remoteServiceName(remoteServiceName)
                 .tag(KafkaInterceptorTagKey.KAFKA_TOPIC, topic)
                 .tag(KafkaInterceptorTagKey.KAFKA_GROUP_ID,
-                  configuration.getString(
-                    ConsumerConfig.GROUP_ID_CONFIG))
+                  configuration.getString(ConsumerConfig.GROUP_ID_CONFIG))
                 .tag(KafkaInterceptorTagKey.KAFKA_CLIENT_ID,
-                  configuration.getString(
-                    ConsumerConfig.CLIENT_ID_CONFIG))
+                  configuration.getString(ConsumerConfig.CLIENT_ID_CONFIG))
                 .start());
           }
           // no need to remove propagation headers as we failed to extract
@@ -86,27 +79,24 @@ public class TracingConsumerInterceptor<K, V> implements ConsumerInterceptor<K, 
           // span.
           Span span = tracing.tracer().nextSpan(extracted);
           if (!span.isNoop()) {
-            span.name(SPAN_NAME).kind(Span.Kind.CONSUMER)
+            span.name(SPAN_NAME)
+              .kind(Span.Kind.CONSUMER)
               .remoteServiceName(remoteServiceName)
               .tag(KafkaInterceptorTagKey.KAFKA_TOPIC, topic)
               .tag(KafkaInterceptorTagKey.KAFKA_GROUP_ID,
-                configuration.getString(
-                  ConsumerConfig.GROUP_ID_CONFIG))
-              .tag(KafkaInterceptorTagKey.KAFKA_CLIENT_ID, configuration
-                .getString(ConsumerConfig.CLIENT_ID_CONFIG));
-            span.start().finish(); // span won't be shared by other records
+                configuration.getString(ConsumerConfig.GROUP_ID_CONFIG))
+              .tag(KafkaInterceptorTagKey.KAFKA_CLIENT_ID,
+                configuration.getString(ConsumerConfig.CLIENT_ID_CONFIG))
+              .start()
+              .finish(); // span won't be shared by other records
           }
           // remove prior propagation headers from the record
-          tracing.propagation().keys()
-            .forEach(key -> record.headers().remove(key));
+          tracing.propagation().keys().forEach(key -> record.headers().remove(key));
           injector.inject(span.context(), record.headers());
         }
       }
     }
-    consumerSpansForTopic.values().forEach(span -> {
-      span.finish();
-      LOGGER.debug("Consumer Record intercepted: {}", span.context());
-    });
+    consumerSpansForTopic.values().forEach(Span::finish);
     return records;
   }
 

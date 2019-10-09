@@ -55,22 +55,15 @@ Start Docker Compose [docker-compose.yml](docker-compose.yml)
 docker-compose up -d
 ```
 
-And to test how it works with Kafka Connectors and KSQL, other composes can be started:
-
-```bash
-docker-compose -f docker-compose.yml -f docker-compose-ksql.yml -f docker-compose-connectors.yml up -d
-```
-
 Steps to test:
-1. Navigate to http://localhost:18080 and login using __postgres__ as server, __postgres__ as username and __example__ as password
+1. Navigate to http://localhost:8080 and login using `postgres` as server, `postgres` as username and `example` as password
 
-2. Create a table "source_table" with an auto-increment __id__ and __name__ field
+2. Create a table `source_table` with an auto-increment `id` and `name` field
 
 3. Once table is created deploy source and sink connectors using Makefile:
 
 ```bash
-make source-connector
-make sink-connector
+make docker-kafka-connectors
 ```
 
 3. Insert values to the table and check the traces.

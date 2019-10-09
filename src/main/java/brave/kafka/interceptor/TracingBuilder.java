@@ -14,6 +14,7 @@
 package brave.kafka.interceptor;
 
 import brave.Tracing;
+import brave.propagation.ThreadLocalCurrentTraceContext;
 import brave.sampler.Sampler;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.slf4j.Logger;

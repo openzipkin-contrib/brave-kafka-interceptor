@@ -23,8 +23,6 @@ import org.apache.kafka.clients.producer.ProducerInterceptor;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.header.Headers;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Record traces when records are sent to a Kafka Topic.
@@ -33,9 +31,7 @@ import org.slf4j.LoggerFactory;
  * the Span created by the interceptor.
  */
 public class TracingProducerInterceptor<K, V> implements ProducerInterceptor<K, V> {
-
-  static final Logger LOGGER = LoggerFactory.getLogger(TracingProducerInterceptor.class);
-  static final String SPAN_NAME = "on_send";
+  static final String SPAN_NAME = "send";
 
   TracingConfiguration configuration;
   Tracing tracing;
@@ -52,14 +48,16 @@ public class TracingProducerInterceptor<K, V> implements ProducerInterceptor<K, 
       if (record.key() instanceof String && !"".equals(record.key())) {
         span.tag(KafkaInterceptorTagKey.KAFKA_KEY, record.key().toString());
       }
-      span.tag(KafkaInterceptorTagKey.KAFKA_TOPIC, record.topic())
+      span
+        .tag(KafkaInterceptorTagKey.KAFKA_TOPIC, record.topic())
         .tag(KafkaInterceptorTagKey.KAFKA_CLIENT_ID,
           configuration.getString(ProducerConfig.CLIENT_ID_CONFIG))
-        .name(SPAN_NAME).kind(Span.Kind.PRODUCER)
-        .remoteServiceName(remoteServiceName).start();
+        .name(SPAN_NAME)
+        .kind(Span.Kind.PRODUCER)
+        .remoteServiceName(remoteServiceName)
+        .start()
+        .finish();
     }
-    span.finish();
-    LOGGER.debug("Producer Record intercepted: {}", span.context());
     return record;
   }
 
@@ -74,7 +72,8 @@ public class TracingProducerInterceptor<K, V> implements ProducerInterceptor<K, 
   @Override public void configure(Map<String, ?> configs) {
     configuration = new TracingConfiguration(configs);
     remoteServiceName =
-      configuration.getStringOrDefault(TracingConfiguration.REMOTE_SERVICE_NAME_CONFIG, TracingConfiguration.REMOTE_SERVICE_NAME_DEFAULT);
+      configuration.getStringOrDefault(TracingConfiguration.REMOTE_SERVICE_NAME_CONFIG,
+        TracingConfiguration.REMOTE_SERVICE_NAME_DEFAULT);
     tracing = new TracingBuilder(configuration).build();
     extractor = tracing.propagation().extractor(KafkaInterceptorPropagation.HEADER_GETTER);
     injector = tracing.propagation().injector(KafkaInterceptorPropagation.HEADER_SETTER);

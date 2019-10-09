@@ -23,8 +23,7 @@ import static org.junit.Assert.assertNotNull;
 
 public class TracingProducerInterceptorTest extends BaseTracingTest {
 
-  private final ProducerRecord<String, String> record = new ProducerRecord<>("topic",
-    "value");
+  private final ProducerRecord<String, String> record = new ProducerRecord<>("topic", "value");
 
   @Test
   public void shouldNotTouchRecords() {
@@ -44,6 +43,7 @@ public class TracingProducerInterceptorTest extends BaseTracingTest {
     interceptor.tracing = tracing;
     // When
     interceptor.onSend(record);
+    interceptor.onAcknowledgement(null, null);
     // Then
     final Span span = spans.getLast();
     assertNotNull(span);
@@ -61,6 +61,7 @@ public class TracingProducerInterceptorTest extends BaseTracingTest {
       .inject(span.context(), record.headers());
     // When
     interceptor.onSend(record);
+    interceptor.onAcknowledgement(null, null);
     // Then
     final Span child = spans.getLast();
     assertNotNull(child);

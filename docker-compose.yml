@@ -15,6 +15,45 @@
 ---
 version: '3'
 services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:5.3.1
+    ports:
+      - 2181:2181
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+  kafka:
+    image: confluentinc/cp-kafka:5.3.1
+    ports:
+      - 9092:9092
+      - 29092:29092
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    depends_on:
+      - zookeeper
+  zipkin:
+    image: openzipkin/zipkin
+    environment:
+      STORAGE_TYPE: mem
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    ports:
+      - 9411:9411
+
+  ## Kafka ecosystem
+  ### Kafka Connectors
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: example
+  adminer:
+    image: adminer
+    ports:
+      - 8080:8080
   jdbc-source-connect:
     image: confluentinc/cp-kafka-connect:5.3.1
     ports:
@@ -35,14 +74,13 @@ services:
       CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
-      CONNECT_PLUGIN_PATH: /usr/share/java,/etc/kafka-connect/jars
+      CONNECT_PLUGIN_PATH: /usr/share/java
       CONNECT_PRODUCER_ZIPKIN_SENDER_TYPE: "HTTP"
       CONNECT_PRODUCER_ZIPKIN_HTTP_ENDPOINT: "http://zipkin:9411/api/v2/spans"
-      CONNECT_PRODUCER_INTERCEPTOR_CLASSES:
-        'no.sysco.middleware.kafka.interceptor.zipkin.TracingProducerInterceptor'
+      CONNECT_PRODUCER_INTERCEPTOR_CLASSES: 'brave.kafka.interceptor.TracingProducerInterceptor'
       CONNECT_PRODUCER_ZIPKIN_LOCAL_SERVICE_NAME: "jdbc-source-connect"
     volumes:
-      - ./target/kafka-interceptor-zipkin-0.4.3-SNAPSHOT.jar:/etc/kafka-connect/jars/kafka-interceptor-zipkin.jar
+      - ./target/brave-kafka-interceptor-0.5.0-SNAPSHOT.jar:/etc/kafka-connect/jars/brave-kafka-interceptor.jar
 
   jdbc-sink-connect:
     image: confluentinc/cp-kafka-connect:5.3.1
@@ -64,20 +102,29 @@ services:
       CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
-      CONNECT_PLUGIN_PATH: /usr/share/java,/etc/kafka-connect/jars
+      CONNECT_PLUGIN_PATH: /usr/share/java
       CONNECT_CONSUMER_ZIPKIN_LOCAL_SERVICE_NAME: "jdbc-sink-connect"
       CONNECT_CONSUMER_ZIPKIN_SENDER_TYPE: "HTTP"
       CONNECT_CONSUMER_ZIPKIN_HTTP_ENDPOINT: "http://zipkin:9411/api/v2/spans"
-      CONNECT_CONSUMER_INTERCEPTOR_CLASSES:
-        'no.sysco.middleware.kafka.interceptor.zipkin.TracingConsumerInterceptor'
+      CONNECT_CONSUMER_INTERCEPTOR_CLASSES: 'brave.kafka.interceptor.TracingConsumerInterceptor'
     volumes:
-      - ./target/kafka-interceptor-zipkin-0.4.3-SNAPSHOT.jar:/etc/kafka-connect/jars/kafka-interceptor-zipkin.jar
-
-  postgres:
-    image: postgres
-    environment:
-      POSTGRES_PASSWORD: example
-  adminer:
-    image: adminer
+      - ./target/brave-kafka-interceptor-0.5.0-SNAPSHOT.jar:/etc/kafka-connect/jars/brave-kafka-interceptor.jar
+  ### KSQL
+  ksql-server:
+    image: confluentinc/cp-ksql-server:5.3.1
     ports:
-    - 18080:8080
+      - 8088:8088
+    depends_on:
+      - kafka
+    environment:
+      KSQL_CUB_KAFKA_TIMEOUT: 300
+      KSQL_BOOTSTRAP_SERVERS: kafka:9092
+      KSQL_LISTENERS: http://0.0.0.0:8088
+      KSQL_KSQL_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      KSQL_KSQL_SERVICE_ID: ksql
+      KSQL_CONSUMER_INTERCEPTOR_CLASSES: "brave.kafka.interceptor.TracingConsumerInterceptor"
+      # Removed 'CONSUMER' from the following 2 Zipkin environment variables.
+      KSQL_ZIPKIN_SENDER_TYPE: "KAFKA"
+      KSQL_ZIPKIN_LOCAL_SERVICE_NAME: "ksql"
+    volumes:
+      - ./target/brave-kafka-interceptor-0.5.0-SNAPSHOT.jar:/usr/share/java/ksql-server/brave-kafka-interceptor.jar
