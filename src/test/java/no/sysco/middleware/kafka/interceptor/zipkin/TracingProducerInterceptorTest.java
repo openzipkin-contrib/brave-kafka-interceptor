@@ -50,13 +50,11 @@ public class TracingProducerInterceptorTest extends BaseTracingTest {
 	@Test
 	public void shouldCreateChildSpanIfContextAvailable() {
 		// Given
-		final TracingProducerInterceptor<String, String> interceptor =
-				new TracingProducerInterceptor<>();
+		final TracingProducerInterceptor<String, String> interceptor = new TracingProducerInterceptor<>();
 		interceptor.configure(map);
 		interceptor.tracing = tracing;
 		brave.Span span = tracing.tracer().newTrace();
-		tracing.propagation()
-				.injector(KafkaInterceptorPropagation.HEADER_SETTER)
+		tracing.propagation().injector(KafkaInterceptorPropagation.HEADER_SETTER)
 				.inject(span.context(), record.headers());
 		// When
 		interceptor.onSend(record);

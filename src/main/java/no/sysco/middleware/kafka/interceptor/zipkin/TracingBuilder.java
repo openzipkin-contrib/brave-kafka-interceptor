@@ -22,7 +22,7 @@ import zipkin2.Span;
 import zipkin2.codec.Encoding;
 import zipkin2.reporter.AsyncReporter;
 import zipkin2.reporter.Sender;
-import zipkin2.reporter.kafka11.KafkaSender;
+import zipkin2.reporter.kafka.KafkaSender;
 import zipkin2.reporter.okhttp3.OkHttpSender;
 
 import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.ENCODING_CONFIG;
@@ -32,8 +32,6 @@ import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.
 import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.KAFKA_BOOTSTRAP_SERVERS_CONFIG;
 import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.LOCAL_SERVICE_NAME_CONFIG;
 import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.LOCAL_SERVICE_NAME_DEFAULT;
-import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.REMOTE_SERVICE_NAME_CONFIG;
-import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.REMOTE_SERVICE_NAME_DEFAULT;
 import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.SAMPLER_RATE_CONFIG;
 import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.SAMPLER_RATE_DEFAULT;
 import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.SENDER_TYPE_CONFIG;
