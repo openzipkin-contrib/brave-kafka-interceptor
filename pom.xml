@@ -61,11 +61,9 @@
   </licenses>
 
   <scm>
-    <connection>scm:git:ssh://git@github.com/openzipkin-contrib/brave-kafka-interceptor.git
-    </connection>
-    <developerConnection>scm:git:ssh://git@github.com/openzipkin-contrib/brave-kafka-interceptor.git
-    </developerConnection>
-    <url>http://github.com/openzipkin-contrib/brave-kafka-interceptor/tree/master</url>
+    <url>https://github.com/openzipkin-contrib/brave-kafka-interceptor</url>
+    <connection>scm:git:https://github.com/openzipkin-contrib/brave-kafka-interceptor.git</connection>
+    <developerConnection>scm:git:https://github.com/openzipkin-contrib/brave-kafka-interceptor.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
 
