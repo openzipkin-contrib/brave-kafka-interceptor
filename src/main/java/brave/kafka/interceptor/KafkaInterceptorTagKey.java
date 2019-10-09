@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Sysco Middleware
+ * Copyright 2018-2019 The OpenZipkin Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -11,17 +11,15 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package no.sysco.middleware.kafka.interceptor.zipkin;
+package brave.kafka.interceptor;
 
 /**
- * Keys to be tagged on spans created by interceptors. See
- * {@link TracingConsumerInterceptor} and {@link TracingProducerInterceptor}
+ * Keys to be tagged on spans created by interceptors. See {@link TracingConsumerInterceptor} and
+ * {@link TracingProducerInterceptor}
  */
 class KafkaInterceptorTagKey {
-
-	static final String KAFKA_TOPIC = "kafka.topic";
-	static final String KAFKA_KEY = "kafka.key";
-	static final String KAFKA_CLIENT_ID = "kafka.client.id";
-	static final String KAFKA_GROUP_ID = "kafka.group.id";
-
+  static final String KAFKA_TOPIC = "kafka.topic";
+  static final String KAFKA_KEY = "kafka.key";
+  static final String KAFKA_CLIENT_ID = "kafka.client.id";
+  static final String KAFKA_GROUP_ID = "kafka.group.id";
 }

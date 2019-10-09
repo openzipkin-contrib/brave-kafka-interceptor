@@ -1,5 +1,5 @@
 #
-# Copyright 2018-2019 Sysco Middleware
+# Copyright 2018-2019 The OpenZipkin Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
 # in compliance with the License. You may obtain a copy of the License at
@@ -15,7 +15,6 @@
 ---
 version: '3'
 services:
-  # Kafka Cluster
   zookeeper:
     image: confluentinc/cp-zookeeper:5.3.1
     ports:
@@ -37,13 +36,95 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
     depends_on:
       - zookeeper
-  # Zipkin
   zipkin:
-    image: openzipkin/zipkin:2.17.1
+    image: openzipkin/zipkin
     environment:
       STORAGE_TYPE: mem
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      # Uncomment to enable debug logging
-      JAVA_OPTS: "-Dlogging.level.zipkin=DEBUG -Dlogging.level.zipkin2=DEBUG"
     ports:
       - 9411:9411
+
+  ## Kafka ecosystem
+  ### Kafka Connectors
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: example
+  adminer:
+    image: adminer
+    ports:
+      - 8080:8080
+  jdbc-source-connect:
+    image: confluentinc/cp-kafka-connect:5.3.1
+    ports:
+      - 8083:8083
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: kafka:9092
+      CONNECT_REST_ADVERTISED_HOST_NAME: localhost
+      CONNECT_REST_PORT: 8083
+      CONNECT_GROUP_ID: jdbc-source-connect
+      CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
+      CONNECT_CONFIG_STORAGE_TOPIC: jdbc-source-connect-configs
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_TOPIC: jdbc-source-connect-offsets
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_TOPIC: jdbc-source-connect-status
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
+      CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_PLUGIN_PATH: /usr/share/java
+      CONNECT_PRODUCER_ZIPKIN_SENDER_TYPE: "HTTP"
+      CONNECT_PRODUCER_ZIPKIN_HTTP_ENDPOINT: "http://zipkin:9411/api/v2/spans"
+      CONNECT_PRODUCER_INTERCEPTOR_CLASSES: 'brave.kafka.interceptor.TracingProducerInterceptor'
+      CONNECT_PRODUCER_ZIPKIN_LOCAL_SERVICE_NAME: "jdbc-source-connect"
+    volumes:
+      - ./target/brave-kafka-interceptor-0.5.0-SNAPSHOT.jar:/etc/kafka-connect/jars/brave-kafka-interceptor.jar
+
+  jdbc-sink-connect:
+    image: confluentinc/cp-kafka-connect:5.3.1
+    ports:
+      - 8084:8084
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: kafka:9092
+      CONNECT_REST_ADVERTISED_HOST_NAME: localhost
+      CONNECT_REST_PORT: 8084
+      CONNECT_GROUP_ID: jdbc-sink-connect
+      CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
+      CONNECT_CONFIG_STORAGE_TOPIC: jdbc-sink-connect-configs
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_TOPIC: jdbc-sink-connect-offsets
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_TOPIC: jdbc-sink-connect-status
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
+      CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_PLUGIN_PATH: /usr/share/java
+      CONNECT_CONSUMER_ZIPKIN_LOCAL_SERVICE_NAME: "jdbc-sink-connect"
+      CONNECT_CONSUMER_ZIPKIN_SENDER_TYPE: "HTTP"
+      CONNECT_CONSUMER_ZIPKIN_HTTP_ENDPOINT: "http://zipkin:9411/api/v2/spans"
+      CONNECT_CONSUMER_INTERCEPTOR_CLASSES: 'brave.kafka.interceptor.TracingConsumerInterceptor'
+    volumes:
+      - ./target/brave-kafka-interceptor-0.5.0-SNAPSHOT.jar:/etc/kafka-connect/jars/brave-kafka-interceptor.jar
+  ### KSQL
+  ksql-server:
+    image: confluentinc/cp-ksql-server:5.3.1
+    ports:
+      - 8088:8088
+    depends_on:
+      - kafka
+    environment:
+      KSQL_CUB_KAFKA_TIMEOUT: 300
+      KSQL_BOOTSTRAP_SERVERS: kafka:9092
+      KSQL_LISTENERS: http://0.0.0.0:8088
+      KSQL_KSQL_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      KSQL_KSQL_SERVICE_ID: ksql
+      KSQL_CONSUMER_INTERCEPTOR_CLASSES: "brave.kafka.interceptor.TracingConsumerInterceptor"
+      # Removed 'CONSUMER' from the following 2 Zipkin environment variables.
+      KSQL_ZIPKIN_SENDER_TYPE: "KAFKA"
+      KSQL_ZIPKIN_LOCAL_SERVICE_NAME: "ksql"
+    volumes:
+      - ./target/brave-kafka-interceptor-0.5.0-SNAPSHOT.jar:/usr/share/java/ksql-server/brave-kafka-interceptor.jar
