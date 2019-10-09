@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package no.sysco.middleware.kafka.interceptor.zipkin;
+package brave.kafka.interceptor;
 
 import brave.Tracing;
 import brave.sampler.Sampler;
@@ -25,19 +25,19 @@ import zipkin2.reporter.Sender;
 import zipkin2.reporter.kafka.KafkaSender;
 import zipkin2.reporter.okhttp3.OkHttpSender;
 
-import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.ENCODING_CONFIG;
-import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.ENCODING_DEFAULT;
-import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.HTTP_ENDPOINT_CONFIG;
-import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.HTTP_ENDPOINT_DEFAULT;
-import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.KAFKA_BOOTSTRAP_SERVERS_CONFIG;
-import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.LOCAL_SERVICE_NAME_CONFIG;
-import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.LOCAL_SERVICE_NAME_DEFAULT;
-import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.SAMPLER_RATE_CONFIG;
-import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.SAMPLER_RATE_DEFAULT;
-import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.SENDER_TYPE_CONFIG;
-import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.SENDER_TYPE_DEFAULT;
-import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.TRACE_ID_128BIT_ENABLED_CONFIG;
-import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.TRACE_ID_128BIT_ENABLED_DEFAULT;
+import static brave.kafka.interceptor.TracingConfiguration.ENCODING_CONFIG;
+import static brave.kafka.interceptor.TracingConfiguration.ENCODING_DEFAULT;
+import static brave.kafka.interceptor.TracingConfiguration.HTTP_ENDPOINT_CONFIG;
+import static brave.kafka.interceptor.TracingConfiguration.HTTP_ENDPOINT_DEFAULT;
+import static brave.kafka.interceptor.TracingConfiguration.KAFKA_BOOTSTRAP_SERVERS_CONFIG;
+import static brave.kafka.interceptor.TracingConfiguration.LOCAL_SERVICE_NAME_CONFIG;
+import static brave.kafka.interceptor.TracingConfiguration.LOCAL_SERVICE_NAME_DEFAULT;
+import static brave.kafka.interceptor.TracingConfiguration.SAMPLER_RATE_CONFIG;
+import static brave.kafka.interceptor.TracingConfiguration.SAMPLER_RATE_DEFAULT;
+import static brave.kafka.interceptor.TracingConfiguration.SENDER_TYPE_CONFIG;
+import static brave.kafka.interceptor.TracingConfiguration.SENDER_TYPE_DEFAULT;
+import static brave.kafka.interceptor.TracingConfiguration.TRACE_ID_128BIT_ENABLED_CONFIG;
+import static brave.kafka.interceptor.TracingConfiguration.TRACE_ID_128BIT_ENABLED_DEFAULT;
 
 /**
  * Initialization of Zipkin Tracing components.

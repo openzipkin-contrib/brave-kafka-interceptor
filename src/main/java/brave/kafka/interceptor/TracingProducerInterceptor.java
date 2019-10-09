@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package no.sysco.middleware.kafka.interceptor.zipkin;
+package brave.kafka.interceptor;
 
 import brave.Span;
 import brave.Tracing;
@@ -25,9 +25,6 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.header.Headers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.REMOTE_SERVICE_NAME_CONFIG;
-import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.REMOTE_SERVICE_NAME_DEFAULT;
 
 /**
  * Record traces when records are sent to a Kafka Topic.
@@ -77,7 +74,7 @@ public class TracingProducerInterceptor<K, V> implements ProducerInterceptor<K, 
   @Override public void configure(Map<String, ?> configs) {
     configuration = new TracingConfiguration(configs);
     remoteServiceName =
-      configuration.getStringOrDefault(REMOTE_SERVICE_NAME_CONFIG, REMOTE_SERVICE_NAME_DEFAULT);
+      configuration.getStringOrDefault(TracingConfiguration.REMOTE_SERVICE_NAME_CONFIG, TracingConfiguration.REMOTE_SERVICE_NAME_DEFAULT);
     tracing = new TracingBuilder(configuration).build();
     extractor = tracing.propagation().extractor(KafkaInterceptorPropagation.HEADER_GETTER);
     injector = tracing.propagation().injector(KafkaInterceptorPropagation.HEADER_SETTER);

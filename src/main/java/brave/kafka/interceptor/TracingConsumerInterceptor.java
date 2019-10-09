@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package no.sysco.middleware.kafka.interceptor.zipkin;
+package brave.kafka.interceptor;
 
 import brave.Span;
 import brave.Tracing;
@@ -30,8 +30,8 @@ import org.apache.kafka.common.header.Headers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.REMOTE_SERVICE_NAME_CONFIG;
-import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.REMOTE_SERVICE_NAME_DEFAULT;
+import static brave.kafka.interceptor.TracingConfiguration.REMOTE_SERVICE_NAME_CONFIG;
+import static brave.kafka.interceptor.TracingConfiguration.REMOTE_SERVICE_NAME_DEFAULT;
 
 /**
  * Record spans when records are received from Consumer API.
