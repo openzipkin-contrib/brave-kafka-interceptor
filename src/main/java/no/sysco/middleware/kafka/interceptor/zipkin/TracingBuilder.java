@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Sysco Middleware
+ * Copyright 2018-2019 The OpenZipkin Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -43,147 +43,126 @@ import static no.sysco.middleware.kafka.interceptor.zipkin.TracingConfiguration.
  * Initialization of Zipkin Tracing components.
  */
 class TracingBuilder {
+  static final Logger LOGGER = LoggerFactory.getLogger(TracingBuilder.class);
 
-	static final Logger LOGGER = LoggerFactory
-			.getLogger(no.sysco.middleware.kafka.interceptor.zipkin.TracingBuilder.class);
+  final String localServiceName;
+  final boolean traceId128Bit;
+  final TracingConfiguration configuration;
 
-	final String localServiceName;
+  TracingBuilder(TracingConfiguration configuration) {
+    this.configuration = configuration;
+    this.localServiceName =
+      configuration.getStringOrDefault(LOCAL_SERVICE_NAME_CONFIG, LOCAL_SERVICE_NAME_DEFAULT);
+    String traceIdEnabledValue = configuration.getStringOrDefault(TRACE_ID_128BIT_ENABLED_CONFIG,
+      TRACE_ID_128BIT_ENABLED_DEFAULT);
+    this.traceId128Bit = Boolean.parseBoolean(traceIdEnabledValue);
+  }
 
-	final boolean traceId128Bit;
+  Tracing build() {
+    Tracing.Builder builder = Tracing.newBuilder();
+    Sender sender = new SenderBuilder(configuration).build();
+    if (sender != null) {
+      AsyncReporter<Span> reporter = AsyncReporter.builder(sender).build();
+      builder.spanReporter(reporter);
+    }
+    Sampler sampler = new SamplerBuilder(configuration).build();
+    return builder.sampler(sampler)
+      .localServiceName(localServiceName)
+      .traceId128Bit(traceId128Bit)
+      .build();
+  }
 
-	final TracingConfiguration configuration;
+  static class SenderBuilder {
+    final SenderType senderType;
+    final TracingConfiguration configuration;
 
-	TracingBuilder(TracingConfiguration configuration) {
-		this.configuration = configuration;
-		this.localServiceName = configuration.getStringOrDefault(
-				LOCAL_SERVICE_NAME_CONFIG, LOCAL_SERVICE_NAME_DEFAULT);
-		String traceIdEnabledValue = configuration.getStringOrDefault(
-				TRACE_ID_128BIT_ENABLED_CONFIG, TRACE_ID_128BIT_ENABLED_DEFAULT);
-		this.traceId128Bit = Boolean.valueOf(traceIdEnabledValue);
-	}
+    SenderBuilder(TracingConfiguration configuration) {
+      String senderTypeValue =
+        configuration.getStringOrDefault(SENDER_TYPE_CONFIG, SENDER_TYPE_DEFAULT);
+      this.senderType = SenderType.valueOf(senderTypeValue);
+      this.configuration = configuration;
+    }
 
-	Tracing build() {
-		Tracing.Builder builder = Tracing.newBuilder();
-		Sender sender = new SenderBuilder(configuration).build();
-		if (sender != null) {
-			AsyncReporter<Span> reporter = AsyncReporter.builder(sender).build();
-			builder.spanReporter(reporter);
-		}
-		Sampler sampler = new SamplerBuilder(configuration).build();
-		return builder.sampler(sampler).localServiceName(localServiceName)
-				.traceId128Bit(traceId128Bit).build();
-	}
+    Sender build() {
+      Encoding encoding = new EncodingBuilder(configuration).build();
+      switch (senderType) {
+        case HTTP:
+          return new HttpSenderBuilder(configuration).build(encoding);
+        case KAFKA:
+          return new KafkaSenderBuilder(configuration).build(encoding);
+        case NONE:
+          return null;
+        default:
+          throw new IllegalArgumentException("Zipkin sender type unknown");
+      }
+    }
 
-	static class SenderBuilder {
+    enum SenderType {
+      NONE, HTTP, KAFKA
+    }
+  }
 
-		final SenderType senderType;
+  static class HttpSenderBuilder {
+    final String endpoint;
 
-		final TracingConfiguration configuration;
+    HttpSenderBuilder(TracingConfiguration configuration) {
+      this.endpoint = configuration.getStringOrDefault(HTTP_ENDPOINT_CONFIG, HTTP_ENDPOINT_DEFAULT);
+    }
 
-		SenderBuilder(TracingConfiguration configuration) {
-			String senderTypeValue = configuration.getStringOrDefault(SENDER_TYPE_CONFIG,
-					SENDER_TYPE_DEFAULT);
-			this.senderType = SenderType.valueOf(senderTypeValue);
-			this.configuration = configuration;
-		}
+    Sender build(Encoding encoding) {
+      return OkHttpSender.newBuilder().endpoint(endpoint).encoding(encoding).build();
+    }
+  }
 
-		Sender build() {
-			Encoding encoding = new EncodingBuilder(configuration).build();
-			switch (senderType) {
-			case HTTP:
-				return new HttpSenderBuilder(configuration).build(encoding);
-			case KAFKA:
-				return new KafkaSenderBuilder(configuration).build(encoding);
-			case NONE:
-				return null;
-			default:
-				throw new IllegalArgumentException("Zipkin sender type unknown");
-			}
-		}
+  public static class KafkaSenderBuilder {
 
-		enum SenderType {
+    final String bootstrapServers;
 
-			NONE, HTTP, KAFKA
+    KafkaSenderBuilder(TracingConfiguration configuration) {
+      this.bootstrapServers = configuration.getStringOrDefault(
+        KAFKA_BOOTSTRAP_SERVERS_CONFIG,
+        configuration.getStringOrDefault(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG,
+          configuration.getStringList(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG)));
+    }
 
-		}
+    Sender build(Encoding encoding) {
+      return KafkaSender.newBuilder().bootstrapServers(bootstrapServers).encoding(encoding).build();
+    }
+  }
 
-	}
+  static class EncodingBuilder {
+    final Encoding encoding;
 
-	static class HttpSenderBuilder {
+    EncodingBuilder(TracingConfiguration configuration) {
+      String encodingValue = configuration.getStringOrDefault(ENCODING_CONFIG, ENCODING_DEFAULT);
+      encoding = Encoding.valueOf(encodingValue);
+    }
 
-		final String endpoint;
+    Encoding build() {
+      return encoding;
+    }
+  }
 
-		HttpSenderBuilder(TracingConfiguration configuration) {
-			this.endpoint = configuration.getStringOrDefault(HTTP_ENDPOINT_CONFIG,
-					HTTP_ENDPOINT_DEFAULT);
-		}
+  static class SamplerBuilder {
+    static final Float SAMPLER_RATE_FALLBACK = 0.0F;
 
-		Sender build(Encoding encoding) {
-			return OkHttpSender.newBuilder().endpoint(endpoint).encoding(encoding)
-					.build();
-		}
+    final Float rate;
 
-	}
+    SamplerBuilder(TracingConfiguration configuration) {
+      String rateValue =
+        configuration.getStringOrDefault(SAMPLER_RATE_CONFIG, SAMPLER_RATE_DEFAULT);
+      Float rate = Float.valueOf(rateValue);
+      if (rate > 1.0 || rate <= 0.0 || rate.isNaN()) {
+        rate = SAMPLER_RATE_FALLBACK;
+        LOGGER.warn(
+          "Invalid sampler rate {}, must be between 0 and 1. Falling back to {}",
+          rate, SAMPLER_RATE_FALLBACK);
+      }
+      this.rate = rate;
+    }
 
-	public static class KafkaSenderBuilder {
-
-		final String bootstrapServers;
-
-		KafkaSenderBuilder(TracingConfiguration configuration) {
-			this.bootstrapServers = configuration.getStringOrDefault(
-					KAFKA_BOOTSTRAP_SERVERS_CONFIG,
-					configuration.getStringOrDefault(
-							CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG,
-							configuration.getStringList(
-									CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG)));
-		}
-
-		Sender build(Encoding encoding) {
-			return KafkaSender.newBuilder().bootstrapServers(bootstrapServers)
-					.encoding(encoding).build();
-		}
-
-	}
-
-	static class EncodingBuilder {
-
-		final Encoding encoding;
-
-		EncodingBuilder(TracingConfiguration configuration) {
-			String encodingValue = configuration.getStringOrDefault(ENCODING_CONFIG,
-					ENCODING_DEFAULT);
-			encoding = Encoding.valueOf(encodingValue);
-		}
-
-		Encoding build() {
-			return encoding;
-		}
-
-	}
-
-	static class SamplerBuilder {
-
-		static final Float SAMPLER_RATE_FALLBACK = 0.0F;
-
-		final Float rate;
-
-		SamplerBuilder(TracingConfiguration configuration) {
-			String rateValue = configuration.getStringOrDefault(SAMPLER_RATE_CONFIG,
-					SAMPLER_RATE_DEFAULT);
-			Float rate = Float.valueOf(rateValue);
-			if (rate > 1.0 || rate <= 0.0 || rate.isNaN()) {
-				rate = SAMPLER_RATE_FALLBACK;
-				LOGGER.warn(
-						"Invalid sampler rate {}, must be between 0 and 1. Falling back to {}",
-						rate, SAMPLER_RATE_FALLBACK);
-			}
-			this.rate = rate;
-		}
-
-		Sampler build() {
-			return Sampler.create(rate);
-		}
-
-	}
-
+    Sampler build() {
+      return Sampler.create(rate);
+    }
+  }
 }
