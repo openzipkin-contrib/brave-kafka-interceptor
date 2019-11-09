@@ -1,6 +1,7 @@
-# Kafka Interceptor: Zipkin
-
+[![Gitter chat](http://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg)](https://gitter.im/openzipkin/zipkin)
 [![Build Status](https://www.travis-ci.org/openzipkin-contrib/brave-kafka-interceptor.svg?branch=master)](https://www.travis-ci.org/openzipkin-contrib/brave-kafka-interceptor)
+
+# Kafka Interceptor: Zipkin
 
 Kafka [Consumer](https://kafka.apache.org/0100/javadoc/org/apache/kafka/clients/consumer/ConsumerInterceptor.html)
 and

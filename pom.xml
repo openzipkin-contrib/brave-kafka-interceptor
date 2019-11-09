@@ -60,8 +60,12 @@
 
   <scm>
     <url>https://github.com/openzipkin-contrib/brave-kafka-interceptor</url>
-    <connection>scm:git:https://github.com/openzipkin-contrib/brave-kafka-interceptor.git</connection>
-    <developerConnection>scm:git:https://github.com/openzipkin-contrib/brave-kafka-interceptor.git</developerConnection>
+    <connection>
+      scm:git:https://github.com/openzipkin-contrib/brave-kafka-interceptor.git
+    </connection>
+    <developerConnection>
+      scm:git:https://github.com/openzipkin-contrib/brave-kafka-interceptor.git
+    </developerConnection>
     <tag>HEAD</tag>
   </scm>
 
@@ -289,6 +293,17 @@
           <autoVersionSubmodules>true</autoVersionSubmodules>
           <!-- to match zipkin-scala (openzipkin/zipkin) -->
           <tagNameFormat>@{project.version}</tagNameFormat>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>io.zipkin.centralsync-maven-plugin</groupId>
+        <artifactId>centralsync-maven-plugin</artifactId>
+        <version>0.1.1</version>
+        <configuration>
+          <subject>openzipkin-contrib</subject>
+          <repo>maven</repo>
+          <packageName>brave-kafka-interceptor</packageName>
         </configuration>
       </plugin>
 
