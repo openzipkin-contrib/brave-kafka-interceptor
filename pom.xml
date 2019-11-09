@@ -19,7 +19,7 @@
 
   <groupId>io.zipkin.contrib.brave</groupId>
   <artifactId>brave-kafka-interceptor</artifactId>
-  <version>0.5.3-SNAPSHOT</version>
+  <version>0.5.3</version>
 
   <packaging>jar</packaging>
 
@@ -66,7 +66,7 @@
     <developerConnection>
       scm:git:https://github.com/openzipkin-contrib/brave-kafka-interceptor.git
     </developerConnection>
-    <tag>HEAD</tag>
+    <tag>0.5.3</tag>
   </scm>
 
   <!-- Developer section is needed for Maven Central, but doesn't need to include each person -->
