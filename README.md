@@ -69,11 +69,21 @@ Steps to test:
 make docker-kafka-connectors
 ```
 
-> Retry if connector workers are not ready yet.
+> Retry if connector workers are not ready yet, or table is not yet created.
 
 * Insert values on table `source_table` to the table and check the traces in `http://localhost:9411`.
 
-* Create a `stream` in KSQL to add its spans to existing traces:
+* Check `sink` topic has data with `kafkacat` or other CLI tool:
+
+```bash
+$ kafkacat -b localhost:29092 -C -t jdbc_source_table
+{"schema":{"type":"struct","fields":[{"type":"int32","optional":false,"field":"id"},{"type":"string","optional":false,"field":"name"}],"optional":false,"name":"source_table"},"payload":{"id":1,"name":"asdf"}}
+{"schema":{"type":"struct","fields":[{"type":"int32","optional":false,"field":"id"},{"type":"string","optional":false,"field":"name"}],"optional":false,"name":"source_table"},"payload":{"id":1,"name":"asdfa"}}
+{"schema":{"type":"struct","fields":[{"type":"int32","optional":false,"field":"id"},{"type":"string","optional":false,"field":"name"}],"optional":false,"name":"source_table"},"payload":{"id":2,"name":"agdsg"}}
+% Reached end of topic jdbc_source_table [0] at offset 3
+```
+
+* To add KSQL spans, create a `stream` in KSQL to add its spans to existing traces:
 
 ```bash
 $CONFLUENT_HOME/bin/ksql http://localhost:8088
@@ -82,7 +92,7 @@ ksql> CREATE STREAM source_stream (id BIGINT, name VARCHAR) WITH (KAFKA_TOPIC='j
 ksql> SELECT id, name FROM source_stream;
 ```
 
-* Traces should look like this:
+* Finally, traces should look like this:
 
 Search:
 
