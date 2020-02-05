@@ -24,6 +24,7 @@ Add Interceptor to Producer Configuration:
 
 ```java
     producerConfig.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG, Collections.singletonList(TracingProducerInterceptor.class));
+    producerConfig.put("interceptor.classes", "brave.kafka.interceptor.TracingProducerInterceptor");
 ```
 ### Consumer Interceptor
 
@@ -34,6 +35,7 @@ the `on_consume` method provided by the API, not how long it took to commit, or 
 
 ```java
     consumerConfig.put(ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG, Collections.singletonList(TracingConsumerInterceptor.class));
+    consumerConfig.put("interceptor.classes", "brave.kafka.interceptor.TracingConsumerInterceptor");
 ```
 
 ### Configuration
@@ -57,25 +59,39 @@ docker-compose up -d
 ```
 
 Steps to test:
-1. Navigate to http://localhost:8080 and login using `postgres` as server, `postgres` as username and `example` as password
+* Navigate to http://localhost:8080 and login using `postgres` as server, `postgres` as username and `example` as password
 
-2. Create a table `source_table` with an auto-increment `id` and `name` field
+* Create a table `source_table` with an auto-increment `id` and `name` field
 
-3. Once table is created deploy source and sink connectors using Makefile:
+* Once table is created deploy source and sink connectors using Makefile:
 
 ```bash
 make docker-kafka-connectors
 ```
 
-3. Insert values to the table and check the traces.
+> Retry if connector workers are not ready yet.
 
-4. Create a Stream in KSQL:
+* Insert values on table `source_table` to the table and check the traces in `http://localhost:9411`.
+
+* Create a `stream` in KSQL to add its spans to existing traces:
 
 ```bash
-ksql http://localhost:8088
- CREATE STREAM source_stream (id BIGINT, name VARCHAR) WITH (KAFKA_TOPIC='jdbc_source_table', VALUE_FORMAT='JSON');
+$CONFLUENT_HOME/bin/ksql http://localhost:8088
+#...
+ksql> CREATE STREAM source_stream (id BIGINT, name VARCHAR) WITH (KAFKA_TOPIC='jdbc_source_table', VALUE_FORMAT='JSON');
+ksql> SELECT id, name FROM source_stream;
 ```
 
-5. Check traces:
+* Traces should look like this:
 
-![](docs/traces.png)
+Search:
+
+![](docs/search.png)
+
+Trace view:
+
+![](docs/trace.png)
+
+Dependencies:
+
+![](docs/dependencies.png)
