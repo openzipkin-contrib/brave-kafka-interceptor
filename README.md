@@ -57,25 +57,32 @@ docker-compose up -d
 ```
 
 Steps to test:
-1. Navigate to http://localhost:8080 and login using `postgres` as server, `postgres` as username and `example` as password
+* Create a table `source_table`:
 
-2. Create a table `source_table` with an auto-increment `id` and `name` field
+```bash
+./create-table.sh
+```
 
-3. Once table is created deploy source and sink connectors using Makefile:
+* Once table is created deploy source and sink connectors using Makefile:
 
 ```bash
 make docker-kafka-connectors
 ```
 
-3. Insert values to the table and check the traces.
+* Insert values to the table:
 
-4. Create a Stream in KSQL:
+```bash
+./create-data.sh
+```
+* Check the traces.
+
+* Create a Stream in KSQL:
 
 ```bash
 ksql http://localhost:8088
  CREATE STREAM source_stream (id BIGINT, name VARCHAR) WITH (KAFKA_TOPIC='jdbc_source_table', VALUE_FORMAT='JSON');
 ```
 
-5. Check traces:
+* Check traces:
 
 ![](docs/traces.png)
