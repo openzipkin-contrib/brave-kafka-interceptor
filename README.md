@@ -52,6 +52,14 @@ the `on_consume` method provided by the API, not how long it took to commit, or 
 
 ### How to test it
 
+Before starting components, make sure to build the project to have JAR files available for containers:
+
+```bash
+make build
+# or 
+./mvnw clean package
+```
+
 Start Docker Compose [docker-compose.yml](docker-compose.yml)
 
 ```bash
