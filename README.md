@@ -24,6 +24,7 @@ Add Interceptor to Producer Configuration:
 
 ```java
     producerConfig.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG, Collections.singletonList(TracingProducerInterceptor.class));
+    producerConfig.put("interceptor.classes", "brave.kafka.interceptor.TracingProducerInterceptor");
 ```
 ### Consumer Interceptor
 
@@ -34,6 +35,7 @@ the `on_consume` method provided by the API, not how long it took to commit, or 
 
 ```java
     consumerConfig.put(ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG, Collections.singletonList(TracingConsumerInterceptor.class));
+    consumerConfig.put("interceptor.classes", "brave.kafka.interceptor.TracingConsumerInterceptor");
 ```
 
 ### Configuration
@@ -50,6 +52,14 @@ the `on_consume` method provided by the API, not how long it took to commit, or 
 
 ### How to test it
 
+Before starting components, make sure to build the project to have JAR files available for containers:
+
+```bash
+make build
+# or 
+./mvnw clean package
+```
+
 Start Docker Compose [docker-compose.yml](docker-compose.yml)
 
 ```bash
@@ -57,25 +67,49 @@ docker-compose up -d
 ```
 
 Steps to test:
-1. Navigate to http://localhost:8080 and login using `postgres` as server, `postgres` as username and `example` as password
+* Navigate to http://localhost:8080 and login using `postgres` as server, `postgres` as username and `example` as password
 
-2. Create a table `source_table` with an auto-increment `id` and `name` field
+* Create a table `source_table` with an auto-increment `id` and `name` field
 
-3. Once table is created deploy source and sink connectors using Makefile:
+* Once table is created deploy source and sink connectors using Makefile:
 
 ```bash
 make docker-kafka-connectors
 ```
 
-3. Insert values to the table and check the traces.
+> Retry if connector workers are not ready yet, or table is not yet created.
 
-4. Create a Stream in KSQL:
+* Insert values on table `source_table` to the table and check the traces in `http://localhost:9411`.
+
+* Check `sink` topic has data with `kafkacat` or other CLI tool:
 
 ```bash
-ksql http://localhost:8088
- CREATE STREAM source_stream (id BIGINT, name VARCHAR) WITH (KAFKA_TOPIC='jdbc_source_table', VALUE_FORMAT='JSON');
+$ kafkacat -b localhost:29092 -C -t jdbc_source_table
+{"schema":{"type":"struct","fields":[{"type":"int32","optional":false,"field":"id"},{"type":"string","optional":false,"field":"name"}],"optional":false,"name":"source_table"},"payload":{"id":1,"name":"asdf"}}
+{"schema":{"type":"struct","fields":[{"type":"int32","optional":false,"field":"id"},{"type":"string","optional":false,"field":"name"}],"optional":false,"name":"source_table"},"payload":{"id":1,"name":"asdfa"}}
+{"schema":{"type":"struct","fields":[{"type":"int32","optional":false,"field":"id"},{"type":"string","optional":false,"field":"name"}],"optional":false,"name":"source_table"},"payload":{"id":2,"name":"agdsg"}}
+% Reached end of topic jdbc_source_table [0] at offset 3
 ```
 
-5. Check traces:
+* To add KSQL spans, create a `stream` in KSQL to add its spans to existing traces:
 
-![](docs/traces.png)
+```bash
+$CONFLUENT_HOME/bin/ksql http://localhost:8088
+#...
+ksql> CREATE STREAM source_stream (id BIGINT, name VARCHAR) WITH (KAFKA_TOPIC='jdbc_source_table', VALUE_FORMAT='JSON');
+ksql> SELECT id, name FROM source_stream;
+```
+
+* Finally, traces should look like this:
+
+Search:
+
+![](docs/search.png)
+
+Trace view:
+
+![](docs/trace.png)
+
+Dependencies:
+
+![](docs/dependencies.png)
