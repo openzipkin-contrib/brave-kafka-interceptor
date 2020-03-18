@@ -24,6 +24,7 @@ Add Interceptor to Producer Configuration:
 
 ```java
     producerConfig.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG, Collections.singletonList(TracingProducerInterceptor.class));
+    producerConfig.put("interceptor.classes", "brave.kafka.interceptor.TracingProducerInterceptor");
 ```
 ### Consumer Interceptor
 
@@ -34,6 +35,7 @@ the `on_consume` method provided by the API, not how long it took to commit, or 
 
 ```java
     consumerConfig.put(ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG, Collections.singletonList(TracingConsumerInterceptor.class));
+    consumerConfig.put("interceptor.classes", "brave.kafka.interceptor.TracingConsumerInterceptor");
 ```
 
 ### Configuration
@@ -49,6 +51,14 @@ the `on_consume` method provided by the API, not how long it took to commit, or 
 | `zipkin.sampler.rate` | Rate to sample spans. Default: `1.0` |
 
 ### How to test it
+
+Before starting components, make sure to build the project to have JAR files available for containers:
+
+```bash
+make build
+# or
+./mvnw clean package
+```
 
 Start Docker Compose [docker-compose.yml](docker-compose.yml)
 
@@ -79,10 +89,22 @@ make docker-kafka-connectors
 * Create a Stream in KSQL:
 
 ```bash
-ksql http://localhost:8088
- CREATE STREAM source_stream (id BIGINT, name VARCHAR) WITH (KAFKA_TOPIC='jdbc_source_table', VALUE_FORMAT='JSON');
+$CONFLUENT_HOME/bin/ksql http://localhost:8088
+#...
+ksql> CREATE STREAM source_stream (id BIGINT, name VARCHAR) WITH (KAFKA_TOPIC='jdbc_source_table', VALUE_FORMAT='JSON');
+ksql> SELECT id, name FROM source_stream;
 ```
 
-* Check traces:
+* Finally, traces should look like this:
 
-![](docs/traces.png)
+Search:
+
+![](docs/search.png)
+
+Trace view:
+
+![](docs/trace.png)
+
+Dependencies:
+
+![](docs/dependencies.png)
