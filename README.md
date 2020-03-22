@@ -68,8 +68,6 @@ make docker-up # will build jars and start containers
 docker-compose up -d
 ```
 
-#### Test Kafka Connectors
-
 Create database tables:
 
 ```shell script
