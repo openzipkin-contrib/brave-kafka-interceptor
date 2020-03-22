@@ -24,6 +24,7 @@ Add Interceptor to Producer Configuration:
 
 ```java
     producerConfig.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG, Collections.singletonList(TracingProducerInterceptor.class));
+    //or
     producerConfig.put("interceptor.classes", "brave.kafka.interceptor.TracingProducerInterceptor");
 ```
 ### Consumer Interceptor
@@ -35,6 +36,7 @@ the `on_consume` method provided by the API, not how long it took to commit, or 
 
 ```java
     consumerConfig.put(ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG, Collections.singletonList(TracingConsumerInterceptor.class));
+    //or
     consumerConfig.put("interceptor.classes", "brave.kafka.interceptor.TracingConsumerInterceptor");
 ```
 
@@ -52,50 +54,51 @@ the `on_consume` method provided by the API, not how long it took to commit, or 
 
 ### How to test it
 
-Before starting components, make sure to build the project to have JAR files available for containers:
+Required software available:
 
-```bash
-make build
+- Docker and Docker Compose available.
+- JDK 11+
+
+Start by building libraries and run Docker Compose:
+
+```shell script
+make docker-up # will build jars and start containers
 # or
 ./mvnw clean package
-```
-
-Start Docker Compose [docker-compose.yml](docker-compose.yml)
-
-```bash
 docker-compose up -d
 ```
 
-Steps to test:
-* Create a table `source_table`:
+#### Test Kafka Connectors
 
-```bash
-./create-table.sh
+Create database tables:
+
+```shell script
+make pg-table
 ```
 
-* Once table is created deploy source and sink connectors using Makefile:
+Once table is created deploy source and sink connectors:
 
-```bash
-make docker-kafka-connectors
+```shell script
+make kafka-connectors
 ```
 
-* Insert values to the table:
+Create a KSQL table and select to wait for results:
 
-```bash
-./create-data.sh
-```
-* Check the traces.
-
-* Create a Stream in KSQL:
-
-```bash
-$CONFLUENT_HOME/bin/ksql http://localhost:8088
-#...
-ksql> CREATE STREAM source_stream (id BIGINT, name VARCHAR) WITH (KAFKA_TOPIC='jdbc_source_table', VALUE_FORMAT='JSON');
-ksql> SELECT id, name FROM source_stream;
+```shell script
+make ksql-stream
+make ksql-select
 ```
 
-* Finally, traces should look like this:
+Insert new rows:
+
+```shell script
+make pg-row
+```
+
+Go to <http://localhost:9411> Check the traces.
+
+
+Traces should look like this:
 
 Search:
 
