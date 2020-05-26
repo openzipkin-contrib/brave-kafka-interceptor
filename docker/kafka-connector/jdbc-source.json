@@ -8,5 +8,8 @@
   "table.whitelist": "source_table",
   "mode": "incrementing",
   "incrementing.column.name": "id",
-  "errors.log.enable": true
+  "errors.log.enable": true,
+  "producer.override.zipkin.local.service.name": "jdbc-source-connect",
+  "producer.override.zipkin.sender.type": "HTTP",
+  "producer.override.zipkin.http.endpoint": "http://zipkin:9411/api/v2/spans"
 }

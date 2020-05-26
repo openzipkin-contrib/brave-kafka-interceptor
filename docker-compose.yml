@@ -83,10 +83,11 @@ services:
       CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       CONNECT_PLUGIN_PATH: /usr/share/java
-      CONNECT_PRODUCER_ZIPKIN_SENDER_TYPE: HTTP
-      CONNECT_PRODUCER_ZIPKIN_HTTP_ENDPOINT: http://zipkin:9411/api/v2/spans
       CONNECT_PRODUCER_INTERCEPTOR_CLASSES: brave.kafka.interceptor.TracingProducerInterceptor
-      CONNECT_PRODUCER_ZIPKIN_LOCAL_SERVICE_NAME: jdbc-source-connect
+      CONNECT_CONNECTOR_CLIENT_CONFIG_OVERRIDE_POLICY: All
+#      CONNECT_PRODUCER_ZIPKIN_LOCAL_SERVICE_NAME: jdbc-source-connect
+#      CONNECT_PRODUCER_ZIPKIN_SENDER_TYPE: HTTP
+#      CONNECT_PRODUCER_ZIPKIN_HTTP_ENDPOINT: http://zipkin:9411/api/v2/spans
     volumes:
       - ./target/brave-kafka-interceptor-0.5.5-SNAPSHOT.jar:/etc/kafka-connect/jars/brave-kafka-interceptor.jar
 
@@ -112,10 +113,11 @@ services:
       CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       CONNECT_PLUGIN_PATH: /usr/share/java
-      CONNECT_CONSUMER_ZIPKIN_LOCAL_SERVICE_NAME: jdbc-sink-connect
-      CONNECT_CONSUMER_ZIPKIN_SENDER_TYPE: HTTP
-      CONNECT_CONSUMER_ZIPKIN_HTTP_ENDPOINT: http://zipkin:9411/api/v2/spans
       CONNECT_CONSUMER_INTERCEPTOR_CLASSES: brave.kafka.interceptor.TracingConsumerInterceptor
+      CONNECT_CONNECTOR_CLIENT_CONFIG_OVERRIDE_POLICY: All
+#      CONNECT_CONSUMER_ZIPKIN_LOCAL_SERVICE_NAME: jdbc-sink-connect
+#      CONNECT_CONSUMER_ZIPKIN_SENDER_TYPE: HTTP
+#      CONNECT_CONSUMER_ZIPKIN_HTTP_ENDPOINT: http://zipkin:9411/api/v2/spans
     volumes:
       - ./target/brave-kafka-interceptor-0.5.5-SNAPSHOT.jar:/etc/kafka-connect/jars/brave-kafka-interceptor.jar
   ### KSQL
