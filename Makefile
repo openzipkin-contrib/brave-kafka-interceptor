@@ -22,7 +22,7 @@ pg-table:
 .PHONY: kafka-connectors
 kafka-connectors:
 	curl -XPUT -H 'Content-Type:application/json' -d @docker/kafka-connector/jdbc-source.json http://localhost:8083/connectors/jdbc_source/config
-	curl -XPUT -H 'Content-Type:application/json' -d @docker/kafka-connector/jdbc-sink.json http://localhost:8084/connectors/jdbc_sink/config
+	curl -XPUT -H 'Content-Type:application/json' -d @docker/kafka-connector/jdbc-sink.json http://localhost:8083/connectors/jdbc_sink/config
 
 .PHONY: pg-row
 pg-row:
@@ -40,6 +40,9 @@ ksql-stream:
 ksql-select:
 	docker-compose exec ksql-cli bash -c \
 		'echo -e "\
-		SELECT id, name FROM source_stream EMIT CHANGES;" \
+		CREATE STREAM another_stream \
+		AS SELECT id, name \
+		FROM source_stream \
+		EMIT CHANGES;" \
 		| ksql http://ksql-server:8088'
 
