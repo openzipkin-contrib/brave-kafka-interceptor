@@ -1,21 +1,23 @@
 [![Gitter chat](http://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg)](https://gitter.im/openzipkin/zipkin)
 [![Build Status](https://www.travis-ci.org/openzipkin-contrib/brave-kafka-interceptor.svg?branch=master)](https://www.travis-ci.org/openzipkin-contrib/brave-kafka-interceptor)
 
-# Kafka Interceptor: Zipkin
+# Brave: Kafka Interceptor
 
 Kafka [Consumer](https://kafka.apache.org/0100/javadoc/org/apache/kafka/clients/consumer/ConsumerInterceptor.html)
 and
 [Producer](https://kafka.apache.org/0100/javadoc/org/apache/kafka/clients/producer/ProducerInterceptor.html)
-Interceptor to record tracing data.
+Interceptors for tracing and report to Zipkin.
 
-This interceptors could be added to Kafka Connectors via configuration and to other off-the-shelf
-components like Kafka REST Proxy, KSQL and so on.
+These interceptors could be plugged into Kafka applications via classpath configuration.
+
+The purpose of this instrumentation is to enable tracing for Kafka Connect and other off-the-shelf components like Kafka REST Proxy, ksqlDB, etc.
+For more complete tracing support, check [Brave instrumentation](https://github.com/openzipkin/brave) for [Kafka Clients](https://github.com/openzipkin/brave/tree/master/instrumentation/kafka-clients) and [Kafka Streams](https://github.com/openzipkin/brave/tree/master/instrumentation/kafka-streams).
 
 ## Installation
 
 ### Producer Interceptor
 
-Producer Interceptor create spans on sending records. This span will only represent the time it took to
+Producer Interceptor create spans when sending records. This span will only represent the time it took to
 execute the `on_send` method provided by the API, not how long to send the actual record, or any other latency.
 
 #### Kafka Clients
