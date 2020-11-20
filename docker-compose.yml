@@ -16,14 +16,14 @@
 version: '3'
 services:
   zookeeper:
-    image: confluentinc/cp-zookeeper:5.5.0
+    image: confluentinc/cp-zookeeper:5.5.2
     ports:
       - 2181:2181
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
   kafka:
-    image: confluentinc/cp-kafka:5.5.0
+    image: confluentinc/cp-kafka:5.5.2
     ports:
       - 9092:9092
       - 29092:29092
@@ -64,7 +64,7 @@ services:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka:9092
   connect:
-    image: confluentinc/cp-kafka-connect:5.5.0
+    image: confluentinc/cp-kafka-connect:5.5.2
     ports:
       - 8083:8083
     environment:
@@ -92,7 +92,7 @@ services:
       - ./target/brave-kafka-interceptor-0.5.5-SNAPSHOT.jar:/etc/kafka-connect/jars/brave-kafka-interceptor.jar
   ### KSQL
   ksql-server:
-    image: confluentinc/cp-ksqldb-server:5.5.0
+    image: confluentinc/cp-ksqldb-server:5.5.2
     ports:
       - 8088:8088
     depends_on:
@@ -110,7 +110,7 @@ services:
     volumes:
       - ./target/brave-kafka-interceptor-0.5.5-SNAPSHOT.jar:/usr/share/java/ksqldb-server/brave-kafka-interceptor.jar
   ksql-cli:
-    image: confluentinc/cp-ksqldb-cli:5.5.0
+    image: confluentinc/cp-ksqldb-cli:5.5.2
     depends_on:
       - ksql-server
     entrypoint: /bin/sh

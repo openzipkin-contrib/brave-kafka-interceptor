@@ -18,10 +18,9 @@ import brave.sampler.Sampler;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import zipkin2.Span;
 import zipkin2.codec.Encoding;
-import zipkin2.reporter.AsyncReporter;
 import zipkin2.reporter.Sender;
+import zipkin2.reporter.brave.AsyncZipkinSpanHandler;
 import zipkin2.reporter.kafka.KafkaSender;
 import zipkin2.reporter.okhttp3.OkHttpSender;
 
@@ -62,8 +61,9 @@ class TracingBuilder {
     Tracing.Builder builder = Tracing.newBuilder();
     Sender sender = new SenderBuilder(configuration).build();
     if (sender != null) {
-      AsyncReporter<Span> reporter = AsyncReporter.builder(sender).build();
-      builder.spanReporter(reporter);
+      // TODO: close hook for both sender and handler?
+      AsyncZipkinSpanHandler zipkinSpanHandler = AsyncZipkinSpanHandler.create(sender);
+      builder.addSpanHandler(zipkinSpanHandler);
     }
     Sampler sampler = new SamplerBuilder(configuration).build();
     return builder.sampler(sampler)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 The OpenZipkin Authors
+ * Copyright 2018-2020 The OpenZipkin Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -14,45 +14,35 @@
 package brave.kafka.interceptor;
 
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.junit.Assert;
-import org.junit.Test;
-import zipkin2.Span;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class TracingProducerInterceptorTest extends BaseTracingTest {
 
-  private final ProducerRecord<String, String> record = new ProducerRecord<>("topic", "value");
+  ProducerRecord<String, String> record = new ProducerRecord<>("topic", "value");
 
-  @Test
-  public void shouldNotTouchRecords() {
-    final TracingProducerInterceptor<String, String> interceptor =
-      new TracingProducerInterceptor<>();
+  @Test void shouldNotTouchRecords() {
+    TracingProducerInterceptor<String, String> interceptor = new TracingProducerInterceptor<>();
     interceptor.configure(map);
-    final ProducerRecord<String, String> tracedRecord = interceptor.onSend(record);
-    Assert.assertEquals(record, tracedRecord);
+    ProducerRecord<String, String> tracedRecord = interceptor.onSend(record);
+    assertThat(tracedRecord).isEqualTo(record);
   }
 
-  @Test
-  public void shouldCreateSpanOnSend() {
+  @Test void shouldCreateSpanOnSend() {
     // Given
-    final TracingProducerInterceptor<String, String> interceptor =
-      new TracingProducerInterceptor<>();
+    TracingProducerInterceptor<String, String> interceptor = new TracingProducerInterceptor<>();
     interceptor.configure(map);
     interceptor.tracing = tracing;
     // When
     interceptor.onSend(record);
     // Then
-    final Span span = spans.getLast();
-    assertNotNull(span);
+    assertThat(spans).isNotEmpty();
   }
 
-  @Test
-  public void shouldCreateChildSpanIfContextAvailable() {
+  @Test void shouldCreateChildSpanIfContextAvailable() {
     // Given
-    final TracingProducerInterceptor<String, String> interceptor =
-      new TracingProducerInterceptor<>();
+    TracingProducerInterceptor<String, String> interceptor = new TracingProducerInterceptor<>();
     interceptor.configure(map);
     interceptor.tracing = tracing;
     brave.Span span = tracing.tracer().newTrace();
@@ -61,8 +51,7 @@ public class TracingProducerInterceptorTest extends BaseTracingTest {
     // When
     interceptor.onSend(record);
     // Then
-    final Span child = spans.getLast();
-    assertNotNull(child);
-    assertEquals(span.context().spanIdString(), child.parentId());
+    assertThat(spans).hasSize(1);
+    assertThat(spans.get(0).parentId()).isEqualTo(span.context().spanIdString());
   }
 }

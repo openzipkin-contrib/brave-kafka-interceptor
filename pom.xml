@@ -14,7 +14,9 @@
     the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>io.zipkin.contrib.brave</groupId>
@@ -24,24 +26,22 @@
   <packaging>jar</packaging>
 
   <distributionManagement>
-    <repository>
-      <id>bintray</id>
-      <url>https://api.bintray.com/maven/openzipkin-contrib/maven/brave-kafka-interceptor/;publish=1</url>
-    </repository>
     <snapshotRepository>
-      <id>jfrog-snapshots</id>
-      <url>https://oss.jfrog.org/artifactory/oss-snapshot-local</url>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
     </snapshotRepository>
+    <repository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
   </distributionManagement>
-
   <issueManagement>
     <system>GitHub</system>
     <url>https://github.com/openzipkin-contrib/brave-kafka-interceptor/issues</url>
   </issueManagement>
 
   <name>Brave: Kafka Interceptor</name>
-  <description>Kafka Interceptors to trace send and poll operations with Brave instrumentation.
-  </description>
+  <description>Kafka Interceptors to trace send and poll operations with Brave instrumentation.</description>
   <url>https://github.com/openzipkin-contrib/brave-kafka-interceptor</url>
   <inceptionYear>2018</inceptionYear>
 
@@ -60,11 +60,9 @@
 
   <scm>
     <url>https://github.com/openzipkin-contrib/brave-kafka-interceptor</url>
-    <connection>
-      scm:git:https://github.com/openzipkin-contrib/brave-kafka-interceptor.git
+    <connection>scm:git:https://github.com/openzipkin-contrib/brave-kafka-interceptor.git
     </connection>
-    <developerConnection>
-      scm:git:https://github.com/openzipkin-contrib/brave-kafka-interceptor.git
+    <developerConnection>scm:git:https://github.com/openzipkin-contrib/brave-kafka-interceptor.git
     </developerConnection>
     <tag>HEAD</tag>
   </scm>
@@ -81,32 +79,42 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.build.resourceEncoding>UTF-8</project.build.resourceEncoding>
+    <project.build.outputEncoding>UTF-8</project.build.outputEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
     <main.basedir>${project.basedir}</main.basedir>
+    <main.signature.artifact>java18</main.signature.artifact>
 
-    <kafka.version>2.5.0</kafka.version>
-    <brave.version>5.12.3</brave.version>
-    <junit-jupiter.version>5.6.2</junit-jupiter.version>
-    <testcontainers.version>1.14.3</testcontainers.version>
-    <assertj.version>3.16.1</assertj.version>
+    <kafka.version>2.6.0</kafka.version>
+    <brave.version>5.13.1</brave.version>
+
+    <junit-jupiter.version>5.7.0</junit-jupiter.version>
+    <testcontainers.version>1.15.0</testcontainers.version>
+    <assertj.version>3.18.0</assertj.version>
 
     <!-- override to set exclusions per-project -->
-    <errorprone.args />
-    <errorprone.version>2.3.3</errorprone.version>
+    <errorprone.args/>
+    <errorprone.version>2.4.0</errorprone.version>
+    <log4j.version>2.14.0</log4j.version>
 
+    <animal-sniffer-maven-plugin.version>1.19</animal-sniffer-maven-plugin.version>
+    <go-offline-maven-plugin.version>1.2.7</go-offline-maven-plugin.version>
+    <!-- TODO: cleanup any redundant ignores now also in the 4.0 release (once final) -->
+    <license-maven-plugin.version>4.0.rc2</license-maven-plugin.version>
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
     <maven-install-plugin.version>3.0.0-M1</maven-install-plugin.version>
     <maven-deploy-plugin.version>3.0.0-M1</maven-deploy-plugin.version>
-    <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
-    <maven-source-plugin.version>3.1.0</maven-source-plugin.version>
-    <maven-javadoc-plugin.version>3.1.1</maven-javadoc-plugin.version>
-    <maven-jar-plugin.version>3.1.2</maven-jar-plugin.version>
-    <maven-failsafe-plugin.version>3.0.0-M3</maven-failsafe-plugin.version>
-    <maven-enforcer-plugin.version>3.0.0-M2</maven-enforcer-plugin.version>
-    <license-maven-plugin.version>3.0</license-maven-plugin.version>
+    <maven-release-plugin.version>3.0.0-M1</maven-release-plugin.version>
+    <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
+    <maven-javadoc-plugin.version>3.2.0</maven-javadoc-plugin.version>
+    <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
+    <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
+    <maven-enforcer-plugin.version>3.0.0-M3</maven-enforcer-plugin.version>
+    <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
   </properties>
 
   <dependencyManagement>
+    <!-- We import the bom because this is an entrypoint tool -->
     <dependencies>
       <dependency>
         <groupId>io.zipkin.brave</groupId>
@@ -119,10 +127,17 @@
   </dependencyManagement>
 
   <dependencies>
+    <!-- Only add absolutely required dependencies as compile scope. Adding more can pin versions,
+         causing problems for end users difficult to unravel. -->
+
     <!-- Brave instrumentation for Kafka Clients -->
     <dependency>
       <groupId>io.zipkin.brave</groupId>
       <artifactId>brave-instrumentation-kafka-clients</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.zipkin.reporter2</groupId>
+      <artifactId>zipkin-reporter-brave</artifactId>
     </dependency>
     <!-- Zipkin sender supported -->
     <dependency>
@@ -143,31 +158,13 @@
     </dependency>
 
     <dependency>
+      <groupId>io.zipkin.brave</groupId>
+      <artifactId>brave-tests</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
-      <version>${junit-jupiter.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.vintage</groupId>
-      <artifactId>junit-vintage-engine</artifactId>
-      <version>${junit-jupiter.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <!--
-    Current versions of JUnit5 provide the above junit-jupiter artifact for convenience but we may
-    still have transitive dependencies on these older artifacts and have to make sure they're all
-    using the same version.
-    -->
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-api</artifactId>
-      <version>${junit-jupiter.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
       <version>${junit-jupiter.version}</version>
       <scope>test</scope>
     </dependency>
@@ -175,6 +172,27 @@
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
       <version>${assertj.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- route jul over log4j2 during tests -->
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-jul</artifactId>
+      <version>${log4j.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- route log4j over log4j2 during tests -->
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-1.2-api</artifactId>
+      <version>${log4j.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- route slf4j over log4j2 during tests -->
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-slf4j-impl</artifactId>
+      <version>${log4j.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -186,11 +204,43 @@
         <plugin>
           <groupId>io.takari</groupId>
           <artifactId>maven</artifactId>
-          <version>0.7.6</version>
+          <version>0.7.7</version>
           <configuration>
-            <maven>3.6.2</maven>
+            <maven>3.6.3</maven>
           </configuration>
         </plugin>
+
+        <!-- mvn de.qaware.maven:go-offline-maven-plugin:resolve-dependencies -->
+        <plugin>
+          <groupId>de.qaware.maven</groupId>
+          <artifactId>go-offline-maven-plugin</artifactId>
+          <version>${go-offline-maven-plugin.version}</version>
+          <configuration>
+            <!-- Add dependencies indirectly referenced by build plugins -->
+            <dynamicDependencies>
+              <DynamicDependency>
+                <groupId>org.codehaus.mojo.signature</groupId>
+                <artifactId>${main.signature.artifact}</artifactId>
+                <version>1.0</version>
+                <type>signature</type>
+                <repositoryType>MAIN</repositoryType>
+              </DynamicDependency>
+              <DynamicDependency>
+                <groupId>com.google.errorprone</groupId>
+                <artifactId>error_prone_core</artifactId>
+                <version>${errorprone.version}</version>
+                <repositoryType>MAIN</repositoryType>
+              </DynamicDependency>
+              <DynamicDependency>
+                <groupId>org.apache.maven.surefire</groupId>
+                <artifactId>surefire-junit-platform</artifactId>
+                <version>${maven-surefire-plugin.version}</version>
+                <repositoryType>PLUGIN</repositoryType>
+              </DynamicDependency>
+            </dynamicDependencies>
+          </configuration>
+        </plugin>
+
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>${maven-compiler-plugin.version}</version>
@@ -198,37 +248,20 @@
           <configuration>
             <source>1.8</source>
             <target>1.8</target>
+            <fork>true</fork>
             <showWarnings>true</showWarnings>
           </configuration>
-          <executions>
-            <execution>
-              <!-- only use errorprone on main source tree -->
-              <id>default-compile</id>
-              <phase>compile</phase>
-              <goals>
-                <goal>compile</goal>
-              </goals>
-              <configuration>
-                <forceJavacCompilerUse>true</forceJavacCompilerUse>
-                <compilerArgs>
-                  <arg>-XDcompilePolicy=simple</arg>
-                  <arg>-Xplugin:ErrorProne ${errorprone.args}</arg>
-                </compilerArgs>
-                <annotationProcessorPaths>
-                  <processorPath>
-                    <groupId>com.google.errorprone</groupId>
-                    <artifactId>error_prone_core</artifactId>
-                    <version>${errorprone.version}</version>
-                  </processorPath>
-                </annotationProcessorPaths>
-              </configuration>
-            </execution>
-          </executions>
         </plugin>
 
         <plugin>
           <artifactId>maven-jar-plugin</artifactId>
           <version>${maven-jar-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.sonatype.plugins</groupId>
+          <artifactId>nexus-staging-maven-plugin</artifactId>
+          <version>${nexus-staging-maven-plugin.version}</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -236,32 +269,26 @@
     <plugins>
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>${maven-failsafe-plugin.version}</version>
-      </plugin>
-      <plugin>
-        <artifactId>maven-failsafe-plugin</artifactId>
-        <version>${maven-failsafe-plugin.version}</version>
-        <executions>
-          <execution>
-            <id>integration-test</id>
-            <phase>verify</phase>
-            <goals>
-              <goal>integration-test</goal>
-              <goal>verify</goal>
-            </goals>
-          </execution>
-        </executions>
+        <version>${maven-surefire-plugin.version}</version>
+        <configuration>
+          <!-- brave-kafka-interceptor specific: SUREFIRE-1614 -->
+          <forkNode implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory" />
+          <systemPropertyVariables>
+            <java.util.logging.manager>org.apache.logging.log4j.jul.LogManager</java.util.logging.manager>
+          </systemPropertyVariables>
+        </configuration>
       </plugin>
 
       <!-- Ensure no Java 9+ api usage -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>animal-sniffer-maven-plugin</artifactId>
-        <version>1.18</version>
+        <version>${animal-sniffer-maven-plugin.version}</version>
         <configuration>
+          <checkTestClasses>false</checkTestClasses>
           <signature>
             <groupId>org.codehaus.mojo.signature</groupId>
-            <artifactId>java18</artifactId>
+            <artifactId>${main.signature.artifact}</artifactId>
             <version>1.0</version>
           </signature>
         </configuration>
@@ -284,6 +311,7 @@
         <artifactId>maven-deploy-plugin</artifactId>
         <version>${maven-deploy-plugin.version}</version>
       </plugin>
+
       <plugin>
         <artifactId>maven-release-plugin</artifactId>
         <version>${maven-release-plugin.version}</version>
@@ -294,61 +322,6 @@
           <!-- to match zipkin-scala (openzipkin/zipkin) -->
           <tagNameFormat>@{project.version}</tagNameFormat>
         </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>io.zipkin.centralsync-maven-plugin</groupId>
-        <artifactId>centralsync-maven-plugin</artifactId>
-        <version>0.1.1</version>
-        <configuration>
-          <subject>openzipkin-contrib</subject>
-          <repo>maven</repo>
-          <packageName>brave-kafka-interceptor</packageName>
-        </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>com.mycila</groupId>
-        <artifactId>license-maven-plugin</artifactId>
-        <version>${license-maven-plugin.version}</version>
-        <configuration>
-          <header>${main.basedir}/src/etc/header.txt</header>
-          <mapping>
-            <!-- Don't use javadoc style as this makes code formatters break it by adding tags! -->
-            <java>SLASHSTAR_STYLE</java>
-          </mapping>
-          <excludes>
-            <exclude>.travis.yml</exclude>
-            <exclude>.gitignore</exclude>
-            <exclude>.editorconfig</exclude>
-            <exclude>.mvn/**</exclude>
-            <exclude>mvnw*</exclude>
-            <exclude>etc/header.txt</exclude>
-            <exclude>**/.idea/**</exclude>
-            <exclude>LICENSE</exclude>
-            <exclude>**/*.md</exclude>
-            <exclude>src/test/resources/**</exclude>
-            <exclude>src/main/resources/**</exclude>
-            <exclude>**/*.puml</exclude>
-            <exclude>Makefile</exclude>
-          </excludes>
-          <strictCheck>true</strictCheck>
-        </configuration>
-        <dependencies>
-          <dependency>
-            <groupId>com.mycila</groupId>
-            <artifactId>license-maven-plugin-git</artifactId>
-            <version>${license-maven-plugin.version}</version>
-          </dependency>
-        </dependencies>
-        <executions>
-          <execution>
-            <goals>
-              <goal>check</goal>
-            </goals>
-            <phase>compile</phase>
-          </execution>
-        </executions>
       </plugin>
 
       <plugin>
@@ -363,24 +336,9 @@
             <configuration>
               <rules>
                 <requireJavaVersion>
-                  <version>[11,12)</version>
+                  <version>[11,16)</version>
                 </requireJavaVersion>
               </rules>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>3.1.1</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-            <configuration>
-              <minimizeJar>true</minimizeJar>
             </configuration>
           </execution>
         </executions>
@@ -389,10 +347,161 @@
   </build>
 
   <profiles>
+    <!-- -DskipTests ensures license libraries aren't required when packaging -->
+    <profile>
+      <id>check-license</id>
+      <activation>
+        <property>
+          <name>!skipTests</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.mycila</groupId>
+            <artifactId>license-maven-plugin</artifactId>
+            <version>${license-maven-plugin.version}</version>
+            <configuration>
+              <header>${main.basedir}/src/etc/header.txt</header>
+              <mapping>
+                <!-- Don't use javadoc style as this makes code formatters break it by adding tags! -->
+                <java>SLASHSTAR_STYLE</java>
+                <!-- build-bin/docker -->
+                <block_on_health>SCRIPT_STYLE</block_on_health>
+                <configure_docker>SCRIPT_STYLE</configure_docker>
+                <configure_docker_push>SCRIPT_STYLE</configure_docker_push>
+                <docker_arch>SCRIPT_STYLE</docker_arch>
+                <docker_args>SCRIPT_STYLE</docker_args>
+                <docker_build>SCRIPT_STYLE</docker_build>
+                <docker_push>SCRIPT_STYLE</docker_push>
+                <!-- build-bin/git -->
+                <login_git>SCRIPT_STYLE</login_git>
+                <version_from_trigger_tag>SCRIPT_STYLE</version_from_trigger_tag>
+                <!-- build-bin/gpg -->
+                <configure_gpg>SCRIPT_STYLE</configure_gpg>
+                <!-- build-bin/maven -->
+                <maven_build_or_unjar>SCRIPT_STYLE</maven_build_or_unjar>
+                <maven_deploy>SCRIPT_STYLE</maven_deploy>
+                <maven_go_offline>SCRIPT_STYLE</maven_go_offline>
+                <maven_release>SCRIPT_STYLE</maven_release>
+                <maven_unjar>SCRIPT_STYLE</maven_unjar>
+              </mapping>
+              <excludes>
+                <exclude>.docker.env</exclude>
+                <exclude>.gitignore</exclude>
+                <exclude>.editorconfig</exclude>
+                <exclude>.mvn/**</exclude>
+                <exclude>mvnw*</exclude>
+                <exclude>etc/header.txt</exclude>
+                <exclude>**/.idea/**</exclude>
+                <exclude>LICENSE</exclude>
+                <exclude>**/*.md</exclude>
+                <exclude>src/test/resources/**</exclude>
+                <exclude>src/main/resources/**</exclude>
+                <exclude>**/*.puml</exclude>
+                <exclude>Makefile</exclude>
+                <exclude>.dockerignore</exclude>
+                <exclude>build-bin/*</exclude>
+              </excludes>
+              <strictCheck>true</strictCheck>
+            </configuration>
+            <dependencies>
+              <dependency>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin-git</artifactId>
+                <version>${license-maven-plugin.version}</version>
+              </dependency>
+            </dependencies>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>check</goal>
+                </goals>
+                <phase>compile</phase>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>error-prone-9+</id>
+      <activation>
+        <jdk>[9,)</jdk>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <executions>
+              <execution>
+                <!-- only use errorprone on main source tree -->
+                <id>default-compile</id>
+                <phase>compile</phase>
+                <goals>
+                  <goal>compile</goal>
+                </goals>
+                <configuration>
+                  <forceJavacCompilerUse>true</forceJavacCompilerUse>
+                  <compilerArgs>
+                    <arg>-XDcompilePolicy=simple</arg>
+                    <arg>-Xplugin:ErrorProne ${errorprone.args}</arg>
+                  </compilerArgs>
+                  <annotationProcessorPaths>
+                    <processorPath>
+                      <groupId>com.google.errorprone</groupId>
+                      <artifactId>error_prone_core</artifactId>
+                      <version>${errorprone.version}</version>
+                    </processorPath>
+                  </annotationProcessorPaths>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
     <profile>
       <id>release</id>
       <build>
         <plugins>
+          <plugin>
+            <groupId>org.sonatype.plugins</groupId>
+            <artifactId>nexus-staging-maven-plugin</artifactId>
+            <extensions>true</extensions>
+            <configuration>
+              <serverId>ossrh</serverId>
+              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+              <!-- Double the normal timeout even though we haven't had a problem in this project.
+                   The only outcome of timing out client side is trying again. -->
+              <stagingProgressTimeoutMinutes>10</stagingProgressTimeoutMinutes>
+              <autoReleaseAfterClose>true</autoReleaseAfterClose>
+            </configuration>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.6</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+                <configuration>
+                  <gpgArguments>
+                    <arg>--pinentry-mode</arg>
+                    <arg>loopback</arg>
+                  </gpgArguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
           <!-- Creates source jar -->
           <plugin>
             <artifactId>maven-source-plugin</artifactId>
@@ -406,14 +515,22 @@
               </execution>
             </executions>
           </plugin>
-          <!-- Creates javadoc jar -->
+
+          <!-- Creates javadoc jar, skipping internal classes -->
           <plugin>
             <artifactId>maven-javadoc-plugin</artifactId>
             <version>${maven-javadoc-plugin.version}</version>
             <configuration>
+              <sourceFileExcludes>
+                <exclude>**/internal/*.java</exclude>
+                <exclude>**/Internal*.java</exclude>
+              </sourceFileExcludes>
+              <excludePackageNames>*.internal.*</excludePackageNames>
               <failOnError>false</failOnError>
               <!-- hush pedantic warnings: we don't put param and return on everything! -->
               <doclint>none</doclint>
+              <!-- While we publish modules, our source is pre-Java9 so tell javadoc that. -->
+              <source>8</source>
             </configuration>
             <executions>
               <execution>

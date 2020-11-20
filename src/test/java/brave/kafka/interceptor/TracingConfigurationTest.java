@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 The OpenZipkin Authors
+ * Copyright 2018-2020 The OpenZipkin Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -17,79 +17,66 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
-public class TracingConfigurationTest {
+class TracingConfigurationTest {
 
-  @Test
-  public void shouldGetStringWhenValueExists() {
+  @Test void shouldGetStringWhenValueExists() {
     // Given
     Map<String, String> configs = new HashMap<>();
     configs.put("k", "v");
     // When
     TracingConfiguration config = new TracingConfiguration(configs);
-    String v = config.getString("k");
     // Then
-    assertEquals("v", v);
+    assertThat(config.getString("k")).isEqualTo("v");
   }
 
-  @Test
-  public void shouldGetNullStringWhenValueDoesNotExist() {
+  @Test void shouldGetNullStringWhenValueDoesNotExist() {
     // Given
     Map<String, String> configs = new HashMap<>();
     // When
     TracingConfiguration config = new TracingConfiguration(configs);
-    String v = config.getString("k1");
     // Then
-    assertNull(v);
+    assertThat(config.getString("k1")).isNull();
   }
 
-  @Test
-  public void shouldGetDefaultWhenStringDoesNotExist() {
+  @Test void shouldGetDefaultWhenStringDoesNotExist() {
     // Given
     Map<String, String> configs = new HashMap<>();
     // When
     TracingConfiguration config = new TracingConfiguration(configs);
-    String v = config.getStringOrDefault("k", "v");
     // Then
-    assertEquals("v", v);
+    assertThat(config.getStringOrDefault("k", "v")).isEqualTo("v");
   }
 
-  @Test
-  public void shouldGetStringAndNotDefaultWhenValueExists() {
+  @Test void shouldGetStringAndNotDefaultWhenValueExists() {
     // Given
     Map<String, String> configs = new HashMap<>();
     configs.put("k", "v");
     // When
     TracingConfiguration config = new TracingConfiguration(configs);
-    String v = config.getStringOrDefault("k", "v1");
     // Then
-    assertEquals("v", v);
+    assertThat(config.getStringOrDefault("k", "v1")).isEqualTo("v");
   }
 
-  @Test
-  public void shouldGetStringListWhenValueExists() {
+  @Test void shouldGetStringListWhenValueExists() {
     // Given
     Map<String, List<String>> configs = new HashMap<>();
     configs.put("k", Arrays.asList("v", "v1"));
     // When
     TracingConfiguration config = new TracingConfiguration(configs);
-    String v = config.getStringList("k");
     // Then
-    assertEquals("v,v1", v);
+    assertThat(config.getStringList("k")).isEqualTo("v,v1");
   }
 
-  @Test
-  public void shouldGetNullWhenStringListValueDoesNotExist() {
+  @Test void shouldGetNullWhenStringListValueDoesNotExist() {
     // Given
     Map<String, List<String>> configs = new HashMap<>();
     // When
     TracingConfiguration config = new TracingConfiguration(configs);
-    String v = config.getStringList("k");
     // Then
-    assertNull(v);
+    assertThat(config.getStringList("k")).isNull();
   }
 }

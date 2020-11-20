@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 The OpenZipkin Authors
+ * Copyright 2018-2020 The OpenZipkin Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -18,7 +18,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.kafka.clients.CommonClientConfigs;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import zipkin2.codec.Encoding;
 import zipkin2.reporter.Sender;
 import zipkin2.reporter.kafka.KafkaSender;
@@ -30,27 +30,21 @@ import static brave.kafka.interceptor.TracingConfiguration.KAFKA_BOOTSTRAP_SERVE
 import static brave.kafka.interceptor.TracingConfiguration.SAMPLER_RATE_CONFIG;
 import static brave.kafka.interceptor.TracingConfiguration.SAMPLER_RATE_DEFAULT;
 import static brave.kafka.interceptor.TracingConfiguration.SENDER_TYPE_CONFIG;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
-public class TracingBuilderTest {
+class TracingBuilderTest {
 
-  @Test
-  public void shouldBuildDefaultEncoding() {
+  @Test void shouldBuildDefaultEncoding() {
     // Given
     Map<String, String> map = new HashMap<>();
     TracingConfiguration config = new TracingConfiguration(map);
     // When
     Encoding encoding = new TracingBuilder.EncodingBuilder(config).build();
     // Then
-    Encoding defaultEncoding = Encoding.valueOf(ENCODING_DEFAULT);
-    assertEquals(defaultEncoding, encoding);
+    assertThat(encoding).isEqualTo(Encoding.valueOf(ENCODING_DEFAULT));
   }
 
-  @Test
-  public void shouldBuildEncoding() {
+  @Test void shouldBuildEncoding() {
     // Given
     Map<String, String> map = new HashMap<>();
     map.put(ENCODING_CONFIG, Encoding.PROTO3.name());
@@ -58,11 +52,10 @@ public class TracingBuilderTest {
     // When
     Encoding encoding = new TracingBuilder.EncodingBuilder(config).build();
     // Then
-    assertEquals(Encoding.PROTO3, encoding);
+    assertThat(encoding).isEqualTo(Encoding.PROTO3);
   }
 
-  @Test
-  public void shouldBuildDefaultSampler() {
+  @Test void shouldBuildDefaultSampler() {
     // Given
     Map<String, String> map = new HashMap<>();
     TracingConfiguration config = new TracingConfiguration(map);
@@ -70,11 +63,10 @@ public class TracingBuilderTest {
     Sampler sampler = new TracingBuilder.SamplerBuilder(config).build();
     // Then
     float defaultSampler = Float.parseFloat(SAMPLER_RATE_DEFAULT);
-    assertEquals(Sampler.create(defaultSampler), sampler);
+    assertThat(sampler).isEqualTo(Sampler.create(defaultSampler));
   }
 
-  @Test
-  public void shouldBuildSampler() {
+  @Test void shouldBuildSampler() {
     // Given
     Map<String, String> map = new HashMap<>();
     map.put(SAMPLER_RATE_CONFIG, "0.5");
@@ -82,11 +74,10 @@ public class TracingBuilderTest {
     // When
     Sampler sampler = new TracingBuilder.SamplerBuilder(config).build();
     // Then
-    assertNotNull(sampler);
+    assertThat(sampler).isNotNull();
   }
 
-  @Test
-  public void shouldBuildSamplerWithFallback() {
+  @Test void shouldBuildSamplerWithFallback() {
     // Given
     Map<String, String> map = new HashMap<>();
     map.put(SAMPLER_RATE_CONFIG, "1.5");
@@ -94,22 +85,20 @@ public class TracingBuilderTest {
     // When
     Sampler sampler = new TracingBuilder.SamplerBuilder(config).build();
     // Then
-    assertNotNull(sampler);
+    assertThat(sampler).isNotNull();
   }
 
-  @Test
-  public void shouldBuildNullSender() {
+  @Test void shouldBuildNullSender() {
     // Given
     Map<String, String> map = new HashMap<>();
     TracingConfiguration config = new TracingConfiguration(map);
     // When
     Sender sender = new TracingBuilder.SenderBuilder(config).build();
     // Then
-    assertNull(sender);
+    assertThat(sender).isNull();
   }
 
-  @Test
-  public void shouldBuildNoneSender() {
+  @Test void shouldBuildNoneSender() {
     // Given
     Map<String, String> map = new HashMap<>();
     map.put(SENDER_TYPE_CONFIG, TracingBuilder.SenderBuilder.SenderType.NONE.name());
@@ -117,11 +106,10 @@ public class TracingBuilderTest {
     // When
     Sender sender = new TracingBuilder.SenderBuilder(config).build();
     // Then
-    assertNull(sender);
+    assertThat(sender).isNull();
   }
 
-  @Test
-  public void shouldBuildHttpSender() {
+  @Test void shouldBuildHttpSender() {
     // Given
     Map<String, String> map = new HashMap<>();
     map.put(SENDER_TYPE_CONFIG, TracingBuilder.SenderBuilder.SenderType.HTTP.name());
@@ -129,11 +117,10 @@ public class TracingBuilderTest {
     // When
     Sender sender = new TracingBuilder.SenderBuilder(config).build();
     // Then
-    assertTrue(sender instanceof OkHttpSender);
+    assertThat(sender).isInstanceOf(OkHttpSender.class);
   }
 
-  @Test
-  public void shouldBuildKafkaSenderWithConfig() {
+  @Test void shouldBuildKafkaSenderWithConfig() {
     // Given
     Map<String, String> map = new HashMap<>();
     map.put(SENDER_TYPE_CONFIG, TracingBuilder.SenderBuilder.SenderType.KAFKA.name());
@@ -142,11 +129,10 @@ public class TracingBuilderTest {
     // When
     Sender sender = new TracingBuilder.SenderBuilder(config).build();
     // Then
-    assertTrue(sender instanceof KafkaSender);
+    assertThat(sender).isInstanceOf(KafkaSender.class);
   }
 
-  @Test
-  public void shouldBuildKafkaSenderWithDefault() {
+  @Test void shouldBuildKafkaSenderWithDefault() {
     // Given
     Map<String, String> map = new HashMap<>();
     map.put(SENDER_TYPE_CONFIG, TracingBuilder.SenderBuilder.SenderType.KAFKA.name());
@@ -155,11 +141,10 @@ public class TracingBuilderTest {
     // When
     Sender sender = new TracingBuilder.SenderBuilder(config).build();
     // Then
-    assertTrue(sender instanceof KafkaSender);
+    assertThat(sender).isInstanceOf(KafkaSender.class);
   }
 
-  @Test
-  public void shouldBuildKafkaSenderWithList() {
+  @Test void shouldBuildKafkaSenderWithList() {
     // Given
     Map<String, Object> map = new HashMap<>();
     map.put(SENDER_TYPE_CONFIG, TracingBuilder.SenderBuilder.SenderType.KAFKA.name());
@@ -169,6 +154,6 @@ public class TracingBuilderTest {
     // When
     Sender sender = new TracingBuilder.SenderBuilder(config).build();
     // Then
-    assertTrue(sender instanceof KafkaSender);
+    assertThat(sender).isInstanceOf(KafkaSender.class);
   }
 }
