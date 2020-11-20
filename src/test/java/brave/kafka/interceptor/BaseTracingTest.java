@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 The OpenZipkin Authors
+ * Copyright 2018-2020 The OpenZipkin Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -14,16 +14,12 @@
 package brave.kafka.interceptor;
 
 import brave.Tracing;
+import brave.test.TestSpanHandler;
 import java.util.HashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import zipkin2.Span;
 
 class BaseTracingTest {
-
-  ConcurrentLinkedDeque<Span> spans = new ConcurrentLinkedDeque<>();
-
-  Tracing tracing = Tracing.newBuilder().spanReporter(spans::add).build();
-
+  TestSpanHandler spans = new TestSpanHandler();
+  Tracing tracing = Tracing.newBuilder().addSpanHandler(spans).build();
   HashMap<String, Object> map = new HashMap<>();
 
   BaseTracingTest() {

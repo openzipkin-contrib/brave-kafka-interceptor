@@ -1,11 +1,11 @@
-[![Gitter chat](http://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg)](https://gitter.im/openzipkin/zipkin)
-[![Build Status](https://www.travis-ci.org/openzipkin-contrib/brave-kafka-interceptor.svg?branch=master)](https://www.travis-ci.org/openzipkin-contrib/brave-kafka-interceptor)
-
 # Brave: Kafka Interceptor
 
+[![Gitter chat](http://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg)](https://gitter.im/openzipkin/zipkin)
+[![Build Status](https://github.com/openzipkin-contrib/brave-kafka-interceptor/workflows/test/badge.svg)](https://github.com/openzipkin-contrib/brave-kafka-interceptor/actions?query=workflow%3Atest)
+[![Maven Central](https://img.shields.io/maven-central/v/io.zipkin.contrib.brave-kafka-interceptor/brave-kafka-interceptor.svg)](https://search.maven.org/search?q=g:io.zipkin.contrib.brave-kafka-interceptor%20AND%20a:brave-kafka-interceptor)
+
 Kafka [Consumer](https://kafka.apache.org/0100/javadoc/org/apache/kafka/clients/consumer/ConsumerInterceptor.html)
-and
-[Producer](https://kafka.apache.org/0100/javadoc/org/apache/kafka/clients/producer/ProducerInterceptor.html)
+and [Producer](https://kafka.apache.org/0100/javadoc/org/apache/kafka/clients/producer/ProducerInterceptor.html)
 Interceptors for tracing and report to Zipkin.
 
 These interceptors could be plugged into Kafka applications via classpath configuration.
@@ -111,3 +111,14 @@ Trace view:
 Dependencies:
 
 ![](docs/dependencies.png)
+
+## Artifacts
+All artifacts publish to the group ID "io.zipkin.contrib.brave-kafka-interceptor". We use a common
+release version for all components.
+
+### Library Releases
+Releases are at [Sonatype](https://oss.sonatype.org/content/repositories/releases) and [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22io.zipkin.contrib.brave-kafka-interceptor%22)
+
+### Library Snapshots
+Snapshots are uploaded to [Sonatype](https://oss.sonatype.org/content/repositories/snapshots) after
+commits to master.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 The OpenZipkin Authors
+ * Copyright 2018-2020 The OpenZipkin Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -18,57 +18,51 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Spliterator;
-import java.util.stream.StreamSupport;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.common.TopicPartition;
-import org.junit.Test;
-import zipkin2.Span;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
-public class TracingConsumerInterceptorTest extends BaseTracingTest {
+class TracingConsumerInterceptorTest extends BaseTracingTest {
 
-  @Test
-  public void shouldNotTouchRecords() {
+  @Test void shouldNotTouchRecords() {
     // Given
-    final Map<TopicPartition, List<ConsumerRecord<String, String>>> topicPartitionAndRecords =
+    Map<TopicPartition, List<ConsumerRecord<String, String>>> topicPartitionAndRecords =
       new HashMap<>();
-    final ConsumerRecord<String, String> record = new ConsumerRecord<>("topic", 0, 0L,
+    ConsumerRecord<String, String> record = new ConsumerRecord<>("topic", 0, 0L,
       "k", "v");
     topicPartitionAndRecords.put(new TopicPartition("topic", 0),
       Collections.singletonList(record));
-    final ConsumerRecords<String, String> records = new ConsumerRecords<>(
+    ConsumerRecords<String, String> records = new ConsumerRecords<>(
       topicPartitionAndRecords);
-    final TracingConsumerInterceptor<String, String> interceptor =
+    TracingConsumerInterceptor<String, String> interceptor =
       new TracingConsumerInterceptor<>();
     interceptor.configure(map);
     // When
-    final ConsumerRecords tracedRecords = interceptor.onConsume(records);
+    ConsumerRecords tracedRecords = interceptor.onConsume(records);
     // Then
-    assertEquals(records, tracedRecords);
+    assertThat(tracedRecords).isEqualTo(records);
   }
 
-  @Test
-  public void shouldCreateSpansOnConsume() {
+  @Test void shouldCreateSpansOnConsume() {
     // Given
-    final Map<TopicPartition, List<ConsumerRecord<String, String>>> topicPartitionAndRecords =
+    Map<TopicPartition, List<ConsumerRecord<String, String>>> topicPartitionAndRecords =
       new HashMap<>();
-    final ConsumerRecord<String, String> record = new ConsumerRecord<>("topic", 0, 0L,
+    ConsumerRecord<String, String> record = new ConsumerRecord<>("topic", 0, 0L,
       "k", "v");
     topicPartitionAndRecords.put(new TopicPartition("topic", 0),
       Arrays.asList(record, record, record));
-    final ConsumerRecords<String, String> records = new ConsumerRecords<>(
+    ConsumerRecords<String, String> records = new ConsumerRecords<>(
       topicPartitionAndRecords);
-    final TracingConsumerInterceptor<String, String> interceptor =
+    TracingConsumerInterceptor<String, String> interceptor =
       new TracingConsumerInterceptor<>();
     interceptor.configure(map);
     interceptor.tracing = tracing;
     // When
     interceptor.onConsume(records);
-    final Spliterator<Span> span = spans.spliterator();
-    long count = StreamSupport.stream(span, false).count();
-    assertEquals(3, count);
+    // Then
+    assertThat(spans).hasSize(3);
   }
 }
