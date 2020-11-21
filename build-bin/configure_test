@@ -8,3 +8,6 @@ set -ue
 # See [README.md] for an explanation of this and how CI should use it.
 
 build-bin/maven/maven_go_offline
+
+# Ensure testcontainers are configured properly
+build-bin/docker/configure_docker
