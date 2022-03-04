@@ -148,7 +148,7 @@ class TracingBuilder {
     void copyConfig(TracingConfiguration from, Map<String, String> to, String key) {
         String value = from.getString(key);
         String kafkaKey = key.replace("zipkin.","");
-        if (value != null)
+        if (value != null && value.length() > 0)
         	overrides.put(kafkaKey, value);
     }
     
