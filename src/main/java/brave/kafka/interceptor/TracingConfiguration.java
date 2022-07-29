@@ -30,6 +30,10 @@ public class TracingConfiguration {
   public static final String HTTP_ENDPOINT_CONFIG = "zipkin.http.endpoint";
   public static final String HTTP_ENDPOINT_DEFAULT = "http://localhost:9411/api/v2/spans";
   public static final String KAFKA_BOOTSTRAP_SERVERS_CONFIG = "zipkin.kafka.bootstrap.servers";
+  public static final String KAFKA_SASL_CONFIG = "zipkin.sasl.jaas.config";
+  public static final String KAFKA_SASL_MECHANISM_CONFIG = "zipkin.sasl.mechanism";
+  public static final String KAFKA_SECURITY_PROTOCOL_CONFIG = "zipkin.security.protocol";
+  public static final String KAFKA_SSL_ENDOPOINT_IDENTIFICATION_ALGORITHM_CONFIG = "zipkin.ssl.endpoint.identification.algorithm";
   public static final String LOCAL_SERVICE_NAME_CONFIG = "zipkin.local.service.name";
   public static final String LOCAL_SERVICE_NAME_DEFAULT = "kafka-client";
   public static final String REMOTE_SERVICE_NAME_CONFIG = "zipkin.remote.service.name";

@@ -37,6 +37,13 @@ import static brave.kafka.interceptor.TracingConfiguration.SENDER_TYPE_CONFIG;
 import static brave.kafka.interceptor.TracingConfiguration.SENDER_TYPE_DEFAULT;
 import static brave.kafka.interceptor.TracingConfiguration.TRACE_ID_128BIT_ENABLED_CONFIG;
 import static brave.kafka.interceptor.TracingConfiguration.TRACE_ID_128BIT_ENABLED_DEFAULT;
+import static brave.kafka.interceptor.TracingConfiguration.KAFKA_SASL_CONFIG;
+import static brave.kafka.interceptor.TracingConfiguration.KAFKA_SASL_MECHANISM_CONFIG;
+import static brave.kafka.interceptor.TracingConfiguration.KAFKA_SECURITY_PROTOCOL_CONFIG;
+import static brave.kafka.interceptor.TracingConfiguration.KAFKA_SSL_ENDOPOINT_IDENTIFICATION_ALGORITHM_CONFIG;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Initialization of Zipkin Tracing components.
@@ -117,16 +124,37 @@ class TracingBuilder {
   public static class KafkaSenderBuilder {
 
     final String bootstrapServers;
+    final Map<String, String> overrides = new HashMap<>();
 
     KafkaSenderBuilder(TracingConfiguration configuration) {
       this.bootstrapServers = configuration.getStringOrDefault(
         KAFKA_BOOTSTRAP_SERVERS_CONFIG,
         configuration.getStringOrDefault(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG,
           configuration.getStringList(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG)));
+
+      this.overrides.putAll(getOverrides(configuration));
     }
 
+    Map<String, String> getOverrides(TracingConfiguration configuration) {
+      Map<String, String> overrides = new HashMap<>();
+
+      copyConfig(configuration, overrides, KAFKA_SASL_CONFIG);
+      copyConfig(configuration, overrides, KAFKA_SASL_MECHANISM_CONFIG);
+      copyConfig(configuration, overrides, KAFKA_SECURITY_PROTOCOL_CONFIG);
+      copyConfig(configuration, overrides, KAFKA_SSL_ENDOPOINT_IDENTIFICATION_ALGORITHM_CONFIG);
+      return overrides;
+    }
+
+    void copyConfig(TracingConfiguration from, Map<String, String> to, String key) {
+      String value = from.getString(key);
+      String kafkaKey = key.replace("zipkin.","");
+      if (value != null && value.length() > 0)
+        overrides.put(kafkaKey, value);
+    }
+
+
     Sender build(Encoding encoding) {
-      return KafkaSender.newBuilder().bootstrapServers(bootstrapServers).encoding(encoding).build();
+      return KafkaSender.newBuilder().bootstrapServers(bootstrapServers).overrides(overrides).encoding(encoding).build();
     }
   }
 
