@@ -37,10 +37,6 @@ import static brave.kafka.interceptor.TracingConfiguration.SENDER_TYPE_CONFIG;
 import static brave.kafka.interceptor.TracingConfiguration.SENDER_TYPE_DEFAULT;
 import static brave.kafka.interceptor.TracingConfiguration.TRACE_ID_128BIT_ENABLED_CONFIG;
 import static brave.kafka.interceptor.TracingConfiguration.TRACE_ID_128BIT_ENABLED_DEFAULT;
-import static brave.kafka.interceptor.TracingConfiguration.KAFKA_SASL_CONFIG;
-import static brave.kafka.interceptor.TracingConfiguration.KAFKA_SASL_MECHANISM_CONFIG;
-import static brave.kafka.interceptor.TracingConfiguration.KAFKA_SECURITY_PROTOCOL_CONFIG;
-import static brave.kafka.interceptor.TracingConfiguration.KAFKA_SSL_ENDOPOINT_IDENTIFICATION_ALGORITHM_CONFIG;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -50,6 +46,8 @@ import java.util.Map;
  */
 class TracingBuilder {
   static final Logger LOGGER = LoggerFactory.getLogger(TracingBuilder.class);
+
+  static final String OVERRIDE_PREFIX="zipkin.kafka.";
 
   final String localServiceName;
   final boolean traceId128Bit;
@@ -138,20 +136,19 @@ class TracingBuilder {
     Map<String, String> getOverrides(TracingConfiguration configuration) {
       Map<String, String> overrides = new HashMap<>();
 
-      copyConfig(configuration, overrides, KAFKA_SASL_CONFIG);
-      copyConfig(configuration, overrides, KAFKA_SASL_MECHANISM_CONFIG);
-      copyConfig(configuration, overrides, KAFKA_SECURITY_PROTOCOL_CONFIG);
-      copyConfig(configuration, overrides, KAFKA_SSL_ENDOPOINT_IDENTIFICATION_ALGORITHM_CONFIG);
+      for (String key : configuration.getKeySet()) {
+        if (key.startsWith(OVERRIDE_PREFIX)) copyConfig(configuration, overrides, key);
+      }
+
       return overrides;
     }
 
     void copyConfig(TracingConfiguration from, Map<String, String> to, String key) {
       String value = from.getString(key);
-      String kafkaKey = key.replace("zipkin.","");
+      String kafkaKey = key.replace(OVERRIDE_PREFIX,"");
       if (value != null && value.length() > 0)
         overrides.put(kafkaKey, value);
     }
-
 
     Sender build(Encoding encoding) {
       return KafkaSender.newBuilder().bootstrapServers(bootstrapServers).overrides(overrides).encoding(encoding).build();
