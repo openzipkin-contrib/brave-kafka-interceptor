@@ -44,16 +44,16 @@ the `on_consume` method provided by the API, not how long it took to commit, or 
 
 ### Configuration
 
-| Key | Value                                                                                                     |
-|-----|-----------------------------------------------------------------------------------------------------------|
-| `zipkin.sender.type` | Sender type: `NONE`(default), `KAFKA`, `HTTP`                                                             |
-| `zipkin.encoding` | Zipkin encoding: `JSON`(default), `PROTO3`.                                                               |
-| `zipkin.http.endpoint` | Zipkin HTTP Endpoint sender.                                                                              |
+| Key | Value                                                                                                      |
+|-----|------------------------------------------------------------------------------------------------------------|
+| `zipkin.sender.type` | Sender type: `NONE`(default), `KAFKA`, `HTTP`                                                              |
+| `zipkin.encoding` | Zipkin encoding: `JSON`(default), `PROTO3`.                                                                |
+| `zipkin.http.endpoint` | Zipkin HTTP Endpoint sender.                                                                               |
 | `zipkin.kafka.bootstrap.servers` | Bootstrap Servers list to send Spans. if not present, `bootstrap.servers` (Kafka Client property) is used. |
-| `zipkin.local.service.name` | Application Service name used to tag span. Default: kafka-client.                                         |
-| `zipkin.trace.id.128bit.enabled` | Trace ID 128 bit enabled, default: `true`                                                                 |
-| `zipkin.sampler.rate` | Rate to sample spans. Default: `1.0`                                                                      |
-| `zipkin.overrides.*`| Any Kafka property to override actual configuration |
+| `zipkin.local.service.name` | Application Service name used to tag span. Default: kafka-client.                                          |
+| `zipkin.trace.id.128bit.enabled` | Trace ID 128 bit enabled, default: `true`                                                                  |
+| `zipkin.sampler.rate` | Rate to sample spans. Default: `1.0`                                                                       |
+| `zipkin.overrides.*`| Use this prefix to to override any kafka producer property                                                 |
 
 ### How to test it
 
