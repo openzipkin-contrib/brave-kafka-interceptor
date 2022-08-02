@@ -156,4 +156,18 @@ class TracingBuilderTest {
     // Then
     assertThat(sender).isInstanceOf(KafkaSender.class);
   }
+
+
+  @Test void shouldBuildKafkaSenderWithOverrides() {
+    // Given
+    Map<String, String> map = new HashMap<>();
+    map.put(SENDER_TYPE_CONFIG, TracingBuilder.SenderBuilder.SenderType.KAFKA.name());
+    map.put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+    map.put(TracingBuilder.OVERRIDE_PREFIX + "acks", "all");
+    TracingConfiguration config = new TracingConfiguration(map);
+    // When
+    Sender sender = new TracingBuilder.SenderBuilder(config).build();
+    // Then
+    assertThat(sender).isInstanceOf(KafkaSender.class);
+  }
 }

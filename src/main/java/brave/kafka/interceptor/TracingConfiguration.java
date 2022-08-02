@@ -81,6 +81,17 @@ public class TracingConfiguration {
     return getStringOrDefault(configKey, null);
   }
 
+  String getStringOrStringList(String configKey) {
+    final String value;
+    final Object valueObject = configs.get(configKey);
+    if (valueObject instanceof AbstractList) {
+      value = getStringList(configKey);
+    } else {
+      value = getStringOrDefault(configKey, null);
+    }
+    return value;
+  }
+
   Set<String> getKeySet() {
     return configs.keySet();
   }

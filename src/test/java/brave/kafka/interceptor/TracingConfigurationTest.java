@@ -79,4 +79,28 @@ class TracingConfigurationTest {
     // Then
     assertThat(config.getStringList("k")).isNull();
   }
+
+  @Test void shouldGetAllKeySet() {
+    // Given
+    Map<String, Object> configs = new HashMap<>();
+    configs.put("k1", "v1");
+    configs.put("k2", "v2");
+    configs.put("k3", Arrays.asList("v", "v3"));
+    // When
+    TracingConfiguration config = new TracingConfiguration(configs);
+    // Then
+    assertThat(config.getKeySet()).isEqualTo(configs.keySet());
+  }
+
+  @Test void shouldGetStringOrStringList() {
+    // Given
+    Map<String, Object> configs = new HashMap<>();
+    configs.put("k1", "v1");
+    configs.put("k2", Arrays.asList("v", "v2"));
+    // When
+    TracingConfiguration config = new TracingConfiguration(configs);
+    // Then
+    assertThat(config.getStringOrStringList("k1")).isEqualTo("v1");
+    assertThat(config.getStringOrStringList("k2")).isEqualTo("v,v2");
+  }
 }
