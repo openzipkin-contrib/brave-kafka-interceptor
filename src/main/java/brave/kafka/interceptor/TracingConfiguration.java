@@ -15,6 +15,8 @@ package brave.kafka.interceptor;
 
 import java.util.AbstractList;
 import java.util.Map;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,5 +79,20 @@ public class TracingConfiguration {
 
   String getString(String configKey) {
     return getStringOrDefault(configKey, null);
+  }
+
+  String getStringOrStringList(String configKey) {
+    final String value;
+    final Object valueObject = configs.get(configKey);
+    if (valueObject instanceof AbstractList) {
+      value = getStringList(configKey);
+    } else {
+      value = getStringOrDefault(configKey, null);
+    }
+    return value;
+  }
+
+  Set<String> getKeySet() {
+    return configs.keySet();
   }
 }
