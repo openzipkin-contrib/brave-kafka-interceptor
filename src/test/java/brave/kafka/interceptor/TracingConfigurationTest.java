@@ -103,4 +103,14 @@ class TracingConfigurationTest {
     assertThat(config.getStringOrStringList("k1")).isEqualTo("v1");
     assertThat(config.getStringOrStringList("k2")).isEqualTo("v,v2");
   }
+
+  @Test void shouldGetKafkaOverrides() {
+    // Given
+    Map<String, Object> configs = new HashMap<>();
+    configs.put(TracingConfiguration.KAFKA_OVERRIDE_PREFIX + "acks", "all");
+    // When
+    TracingConfiguration config = new TracingConfiguration(configs);
+    // Then
+    assertThat(config.getKafkaOverrides()).containsEntry("acks", "all");
+  }
 }
