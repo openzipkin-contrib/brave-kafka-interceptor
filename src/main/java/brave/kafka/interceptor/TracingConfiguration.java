@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 The OpenZipkin Authors
+ * Copyright 2018-2022 The OpenZipkin Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -14,7 +14,10 @@
 package brave.kafka.interceptor;
 
 import java.util.AbstractList;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +43,7 @@ public class TracingConfiguration {
   public static final String ENCODING_DEFAULT = "JSON";
   public static final String SAMPLER_RATE_CONFIG = "zipkin.sampler.rate";
   public static final String SAMPLER_RATE_DEFAULT = "1.0F";
+  public static final String KAFKA_OVERRIDE_PREFIX = "zipkin.kafka.";
 
   final Map<String, ?> configs;
 
@@ -77,5 +81,45 @@ public class TracingConfiguration {
 
   String getString(String configKey) {
     return getStringOrDefault(configKey, null);
+  }
+
+  /**
+   * @return Value as a string regardless of whether the type of the property is a String
+   *         or a List (for instance `bootstrap.servers` property may have a List of servers
+   *         instead of a single String). If not found, then null is returned.
+   */
+  String getStringOrStringList(String configKey) {
+    final String value;
+    final Object valueObject = configs.get(configKey);
+    if (valueObject instanceof AbstractList) {
+      value = getStringList(configKey);
+    } else {
+      value = getStringOrDefault(configKey, null);
+    }
+    return value;
+  }
+
+  Map<String, String> getKafkaOverrides() {
+    Map<String, String> overrides = new HashMap<>();
+
+    for (String key : getKeySet()) {
+      if (!key.equals(KAFKA_BOOTSTRAP_SERVERS_CONFIG) && key.startsWith(KAFKA_OVERRIDE_PREFIX))
+        copyConfig(overrides, key);
+    }
+
+    return overrides;
+  }
+
+  void copyConfig(Map<String, String> to, String key) {
+    String value = getStringOrStringList(key);
+    String kafkaKey = key.replace(KAFKA_OVERRIDE_PREFIX,"");
+    if (value != null && value.length() > 0) {
+      to.put(kafkaKey, value);
+      LOGGER.info("Adding '{}:{}' property to kafka configuration", kafkaKey, value);
+    }
+  }
+
+  Set<String> getKeySet() {
+    return configs.keySet();
   }
 }

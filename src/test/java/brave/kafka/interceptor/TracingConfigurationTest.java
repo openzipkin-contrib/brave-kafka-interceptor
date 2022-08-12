@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 The OpenZipkin Authors
+ * Copyright 2018-2022 The OpenZipkin Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -78,5 +78,39 @@ class TracingConfigurationTest {
     TracingConfiguration config = new TracingConfiguration(configs);
     // Then
     assertThat(config.getStringList("k")).isNull();
+  }
+
+  @Test void shouldGetAllKeySet() {
+    // Given
+    Map<String, Object> configs = new HashMap<>();
+    configs.put("k1", "v1");
+    configs.put("k2", "v2");
+    configs.put("k3", Arrays.asList("v", "v3"));
+    // When
+    TracingConfiguration config = new TracingConfiguration(configs);
+    // Then
+    assertThat(config.getKeySet()).isEqualTo(configs.keySet());
+  }
+
+  @Test void shouldGetStringOrStringList() {
+    // Given
+    Map<String, Object> configs = new HashMap<>();
+    configs.put("k1", "v1");
+    configs.put("k2", Arrays.asList("v", "v2"));
+    // When
+    TracingConfiguration config = new TracingConfiguration(configs);
+    // Then
+    assertThat(config.getStringOrStringList("k1")).isEqualTo("v1");
+    assertThat(config.getStringOrStringList("k2")).isEqualTo("v,v2");
+  }
+
+  @Test void shouldGetKafkaOverrides() {
+    // Given
+    Map<String, Object> configs = new HashMap<>();
+    configs.put(TracingConfiguration.KAFKA_OVERRIDE_PREFIX + "acks", "all");
+    // When
+    TracingConfiguration config = new TracingConfiguration(configs);
+    // Then
+    assertThat(config.getKafkaOverrides()).containsEntry("acks", "all");
   }
 }

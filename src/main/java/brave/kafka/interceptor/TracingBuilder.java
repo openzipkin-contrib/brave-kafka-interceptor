@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 The OpenZipkin Authors
+ * Copyright 2018-2022 The OpenZipkin Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -37,6 +37,9 @@ import static brave.kafka.interceptor.TracingConfiguration.SENDER_TYPE_CONFIG;
 import static brave.kafka.interceptor.TracingConfiguration.SENDER_TYPE_DEFAULT;
 import static brave.kafka.interceptor.TracingConfiguration.TRACE_ID_128BIT_ENABLED_CONFIG;
 import static brave.kafka.interceptor.TracingConfiguration.TRACE_ID_128BIT_ENABLED_DEFAULT;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Initialization of Zipkin Tracing components.
@@ -117,16 +120,19 @@ class TracingBuilder {
   public static class KafkaSenderBuilder {
 
     final String bootstrapServers;
+    final Map<String, String> overrides = new HashMap<>();
 
     KafkaSenderBuilder(TracingConfiguration configuration) {
       this.bootstrapServers = configuration.getStringOrDefault(
         KAFKA_BOOTSTRAP_SERVERS_CONFIG,
         configuration.getStringOrDefault(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG,
           configuration.getStringList(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG)));
+
+      this.overrides.putAll(configuration.getKafkaOverrides());
     }
 
     Sender build(Encoding encoding) {
-      return KafkaSender.newBuilder().bootstrapServers(bootstrapServers).encoding(encoding).build();
+      return KafkaSender.newBuilder().bootstrapServers(bootstrapServers).overrides(overrides).encoding(encoding).build();
     }
   }
 

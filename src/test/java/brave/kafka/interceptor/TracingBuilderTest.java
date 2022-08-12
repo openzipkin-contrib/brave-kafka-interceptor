@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 The OpenZipkin Authors
+ * Copyright 2018-2022 The OpenZipkin Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -150,6 +150,20 @@ class TracingBuilderTest {
     map.put(SENDER_TYPE_CONFIG, TracingBuilder.SenderBuilder.SenderType.KAFKA.name());
     map.put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG,
       Arrays.asList("localhost:9092", "localhost:9094"));
+    TracingConfiguration config = new TracingConfiguration(map);
+    // When
+    Sender sender = new TracingBuilder.SenderBuilder(config).build();
+    // Then
+    assertThat(sender).isInstanceOf(KafkaSender.class);
+  }
+
+
+  @Test void shouldBuildKafkaSenderWithOverrides() {
+    // Given
+    Map<String, String> map = new HashMap<>();
+    map.put(SENDER_TYPE_CONFIG, TracingBuilder.SenderBuilder.SenderType.KAFKA.name());
+    map.put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+    map.put(TracingConfiguration.KAFKA_OVERRIDE_PREFIX + "acks", "all");
     TracingConfiguration config = new TracingConfiguration(map);
     // When
     Sender sender = new TracingBuilder.SenderBuilder(config).build();
