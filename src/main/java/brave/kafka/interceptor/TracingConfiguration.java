@@ -83,6 +83,11 @@ public class TracingConfiguration {
     return getStringOrDefault(configKey, null);
   }
 
+  /**
+   * @return Value as a string regardless of whether the type of the property is a String
+   *         or a List (for instance `bootstrap.servers` property may have a List of servers
+   *         instead of a single String). If not found, then null is returned.
+   */
   String getStringOrStringList(String configKey) {
     final String value;
     final Object valueObject = configs.get(configKey);
