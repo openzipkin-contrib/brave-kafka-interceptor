@@ -47,8 +47,6 @@ import java.util.Map;
 class TracingBuilder {
   static final Logger LOGGER = LoggerFactory.getLogger(TracingBuilder.class);
 
-  static final String OVERRIDE_PREFIX="zipkin.kafka.";
-
   final String localServiceName;
   final boolean traceId128Bit;
   final TracingConfiguration configuration;
@@ -130,28 +128,7 @@ class TracingBuilder {
         configuration.getStringOrDefault(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG,
           configuration.getStringList(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG)));
 
-      this.overrides.putAll(getOverrides(configuration));
-    }
-
-    Map<String, String> getOverrides(TracingConfiguration configuration) {
-      Map<String, String> overrides = new HashMap<>();
-
-      for (String key : configuration.getKeySet()) {
-        if (!key.equals(KAFKA_BOOTSTRAP_SERVERS_CONFIG) && key.startsWith(OVERRIDE_PREFIX))
-                copyConfig(configuration, overrides, key);
-      }
-
-      return overrides;
-    }
-
-    void copyConfig(TracingConfiguration from, Map<String, String> to, String key) {
-
-      String value = from.getStringOrStringList(key);
-      String kafkaKey = key.replace(OVERRIDE_PREFIX,"");
-      if (value != null && value.length() > 0) {
-        to.put(kafkaKey, value);
-        LOGGER.info("Adding '{}:{}' property to kafka configuration", kafkaKey, value);
-      }
+      this.overrides.putAll(configuration.getKafkaOverrides());
     }
 
     Sender build(Encoding encoding) {
